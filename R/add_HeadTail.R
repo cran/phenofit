@@ -1,15 +1,15 @@
 #'
 #' Add one year data in the head and tail
 #'
-#' @param d A data.table, should have \code{t} (compositing date) or \code{date}
-#' (image date) column which are (\code{Date} variable).
+#' @param d A data.table, should have `t` (compositing date) or `date`
+#' (image date) column which are (`Date` variable).
 #' @inheritParams check_input
 #' @inheritParams season
 #'
 #' @param trs If nmissing < trs*nptperyear (little missing), this year is
-#' include to extract phenology; if \code{FALSE}, this year is excluded.
+#' include to extract phenology; if `FALSE`, this year is excluded.
 #'
-#' @note \code{date} is image date; \code{t} is compositing date.
+#' @note `date` is image date; `t` is compositing date.
 #'
 #' @return data.table
 #' @importFrom lubridate ddays
@@ -30,15 +30,21 @@
 #'
 #' @export
 add_HeadTail <- function(d, south = FALSE, nptperyear, trs = 0.45){
+    ## check dateband first
+    # date : image date
+    # t    : compositing date
+    bandname <- intersect(c("t", "date"), colnames(d))[1]
+    if (!is.Date(d[[bandname]])) {
+        d[[bandname]] %<>% as.Date()
+    }
+    dates    <- d[[bandname]]
+
     if (missing(nptperyear)){
         nptperyear <- ceiling(365/as.numeric(difftime(d[[bandname]][2], d[[bandname]][1], units = "days")))
     }
     ntrs  <- nptperyear*trs
 
-    # date : image date
-    # t    : compositing date
-    bandname <- intersect(c("t", "date"), colnames(d))[1]
-    dates    <- d[[bandname]]
+
 
     ## can coop with years not continuous now
     ntime    <- nrow(d)

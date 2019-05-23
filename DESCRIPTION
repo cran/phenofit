@@ -1,7 +1,7 @@
 Package: phenofit
 Type: Package
 Title: Extract Remote Sensing Vegetation Phenology
-Version: 0.2.0
+Version: 0.2.3
 Authors@R: c(
     person("Dongdong", "Kong", role = c("aut", "cre"), email = "kongdd.sysu@gmail.com"),
     person("Mingzhong", "Xiao", role = c("aut"), email = "xmingzh@mail2.sysu.edu.cn"),
@@ -24,13 +24,13 @@ LinkingTo: Rcpp, RcppArmadillo
 Depends: R (>= 3.1)
 Imports: Rcpp, tibble, dplyr, purrr, stringr, tidyr, ggplot2,
         lubridate, data.table, spam, grid, gridExtra, magrittr, plyr,
-        reshape2, zoo, optimx, ucminf, numDeriv, grDevices, utils,
-        stats, DT
+        reshape2, zoo, readr, optimx, ucminf, numDeriv, grDevices,
+        utils, stats, shiny, jsonlite, DT, foreach, iterators
 Suggests: knitr, rmarkdown, testthat
 URL: https://github.com/kongdd/phenofit
 BugReports: https://github.com/kongdd/phenofit/issues
 NeedsCompilation: yes
-Packaged: 2019-02-08 23:37:39 UTC; kongdd
+Packaged: 2019-05-23 17:14:34 UTC; kongd
 Author: Dongdong Kong [aut, cre],
   Mingzhong Xiao [aut],
   Yongqiang Zhang [aut],
@@ -38,4 +38,4 @@ Author: Dongdong Kong [aut, cre],
   Jianjian Cui [aut]
 Maintainer: Dongdong Kong <kongdd.sysu@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-02-18 11:50:04 UTC
+Date/Publication: 2019-05-23 18:00:03 UTC

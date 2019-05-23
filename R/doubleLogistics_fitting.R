@@ -29,7 +29,7 @@
 #' @param tout the time of output curve fitting time-series.
 #' @param method method passed to `optimx` or `optim` function.
 #' @param w weights
-#' @param ... other paraters passed to \code{\link{optim_pheno}}.
+#' @param ... other paraters passed to [optim_pheno()].
 #'
 #' @return
 #' \describe{
@@ -41,7 +41,7 @@
 #' }
 #' 
 #' @references
-#' [1]. Beck, P.S.A., Atzberger, C., Hogda, K.A., Johansen, B., Skidmore, A.K.,
+#' 1. Beck, P.S.A., Atzberger, C., Hogda, K.A., Johansen, B., Skidmore, A.K.,
 #'      2006. Improved monitoring of vegetation dynamics at very high latitudes:
 #'      A new method using MODIS NDVI. Remote Sens. Environ.
 #'      https://doi.org/10.1016/j.rse.2005.10.021.
@@ -60,7 +60,7 @@ FitDL.Zhang <- function(y, t = index(y), tout = t,
     prior  <- with(e, rbind(
         c(doy.mx   , mn, mx, doy[1]   , k  , doy[2]   , k  ),
         c(doy.mx   , mn, mx, doy[1]+t1, k*2, doy[2]-t1, k*2),
-        c(doy.mx   , mn, mx, doy[1]-t1, k/2, doy[2]+t2, k/2)))
+        c(doy.mx   , mn, mx, doy[1]-t1, k  , doy[2]+t2, k)))
 
     param_lims <- e$lims[c('t0', 'mn', 'mx', 'sos', 'r', 'eos', 'r')]
     # param_lims$r[2] %<>% multiply_by(2)
@@ -119,7 +119,7 @@ FitDL.Beck <- function(y, t = index(y), tout = t,
 # attr(doubleLog.Beck, 'formula') <- expression(mn + (mx - mn)*(1/(1 + exp(-rsp*(t - sos))) + 1/(1 + exp(rau*(t - eos)))))
 
 #' @references
-#' [2]. Elmore, A.J., Guinn, S.M., Minsley, B.J., Richardson, A.D., 2012.
+#' 2. Elmore, A.J., Guinn, S.M., Minsley, B.J., Richardson, A.D., 2012.
 #'      Landscape controls on the timing of spring, autumn, and growing season
 #'      length in mid-Atlantic forests. Glob. Chang. Biol. 18, 656-674.
 #'      https://doi.org/10.1111/j.1365-2486.2011.02521.x. \cr
@@ -135,8 +135,8 @@ FitDL.Elmore <- function(y, t = index(y), tout = t,
     prior <- with(e, rbind(
         c(mn, mx - mn, doy[1]+t1, k*2.5  , doy[2]-t2, k*2.5  , 0.002),
         c(mn, mx - mn, doy[1]   , k*1.25 , doy[2]   , k*1.25 , 0.002),
-        c(mn, mx - mn, doy[1]   , k*0.5  , doy[2]   , k*0.5  , 0.05),
-        c(mn, mx - mn, doy[1]-t1, k*0.25 , doy[2]+t2, k*0.25, 0.1)))
+        c(mn, mx - mn, doy[1]   , k*1  , doy[2]   , k*0.5  , 0.05),
+        c(mn, mx - mn, doy[1]-t1, k*1 , doy[2]+t2, k*0.25, 0.1)))
     # xpred <- m1 + (m2 - m7*t)*((1/(1 + exp((m3l - t)/m4l))) - (1/(1 + exp((m5l - t)/m6l))))
     param_lims <- e$lims[c('mn', 'mx', 'sos', 'r', 'eos', 'r')]
     lower  <- c(sapply(param_lims, `[`, 1), 0  )
@@ -155,14 +155,14 @@ FitDL.Elmore <- function(y, t = index(y), tout = t,
 # attr(doubleLog.Elmore, 'formula') <- expression( mn + (mx - m7*t)*( 1/(1 + exp(-rsp*(t-sos))) - 1/(1 + exp(-rau*(t-eos))) ) )
 
 #' @references
-#' [3]. Gu, L., Post, W.M., Baldocchi, D.D., Black, TRUE.A., Suyker, A.E., Verma,
+#' 3. Gu, L., Post, W.M., Baldocchi, D.D., Black, TRUE.A., Suyker, A.E., Verma,
 #'      S.B., Vesala, TRUE., Wofsy, S.C., 2009. Characterizing the Seasonal Dynamics
 #'      of Plant Community Photosynthesis Across a Range of Vegetation Types,
 #'      in: Noormets, A. (Ed.), Phenology of Ecosystem Processes: Applications
 #'      in Global Change Research. Springer New York, New York, NY, pp. 35-58.
 #'      https://doi.org/10.1007/978-1-4419-0026-5_2. \cr
 #'
-#' [4]. https://github.com/kongdd/phenopix/blob/master/R/FitDoubleLogGu.R
+#' 4. https://github.com/kongdd/phenopix/blob/master/R/FitDoubleLogGu.R
 #'
 #' @rdname FitDL
 #' @export
@@ -180,7 +180,7 @@ FitDL.Gu <- function(y, t = index(y), tout = t,
 
     sFUN  <- "doubleLog.Gu"
     prior <- with(e, rbind(
-        c(mn, a, a, doy[1]-t1, k/2 , doy[2]+t2, k/2, 1  , 1),
+        # c(mn, a, a, doy[1]-t1, k/2 , doy[2]+t2, k/2, 1  , 1),
         c(mn, a, a, doy[1]   , k   , doy[2]   , k  , 2  , 2),
         c(mn, a, a, doy[1]   , k*2 , doy[2]   , k*2, 3  , 3),
         c(mn, a, a, doy[1]+t1, k*2 , doy[2]-t2, k*2, 0.5, 0.5),

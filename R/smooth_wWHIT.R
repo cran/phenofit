@@ -10,10 +10,10 @@
 #' @return A numeric vector, smoothed signal.
 #'
 #' @references
-#' [1]. Eilers, P.H.C. (2004) "Parametric Time Warping", Analytical Chemistry,
-#' \bold{76} (2), 404 -- 411. \cr
-#' [2]. Eilers, P.H.C. (2003) "A perfect smoother", Analytical Chemistry,
-#' \bold{75}, 3631 -- 3636.
+#' 1. Eilers, P.H.C. (2004) "Parametric Time Warping", Analytical Chemistry,
+#' **76** (2), 404 -- 411. \cr
+#' 2. Eilers, P.H.C. (2003) "A perfect smoother", Analytical Chemistry,
+#' **75**, 3631 -- 3636.
 #'
 #' @author Paul Eilers, Jan Gerretzen
 #' @examples
@@ -58,8 +58,8 @@ whit2 <- function(y, lambda, w = rep(1, ny))
 #' @inherit wHANTS return
 #' 
 #' @references
-#' [1]. Eilers, P.H.C., 2003. A perfect smoother. Anal. Chem. https://doi.org/10.1021/ac034173t \cr
-#' [2]. Frasso, G., Eilers, P.H.C., 2015. L- and V-curves for optimal smoothing. Stat.
+#' 1. Eilers, P.H.C., 2003. A perfect smoother. Anal. Chem. https://doi.org/10.1021/ac034173t \cr
+#' 2. Frasso, G., Eilers, P.H.C., 2015. L- and V-curves for optimal smoothing. Stat.
 #'      Modelling 15, 91–111. https://doi.org/10.1177/1471082X14549288
 #' 
 #' @examples
@@ -74,6 +74,7 @@ whit2 <- function(y, lambda, w = rep(1, ny))
 wWHIT <- function(y, w, ylu, nptperyear, wFUN = wTSM, iters=1, lambda=15,
     second = FALSE, ...) #, df = NULL
 {
+    trs <- 0.5
     if (all(is.na(y))) return(y)
     n <- sum(w)
 
@@ -94,11 +95,17 @@ wWHIT <- function(y, w, ylu, nptperyear, wFUN = wTSM, iters=1, lambda=15,
             # situation.
             if (second) z <- whit2(z, lambda_j, w) #genius move
 
-            ## Based on our test, check_fit and upper envelope will decrease 
+            ## Based on our test, check_ylu and upper envelope will decrease 
             # `wWWHIT`'s performance (20181029). 
-            z <- check_fit(z, ylu)
-            yiter[yiter < z] <- z[yiter < z] # upper envelope
+            z <- check_ylu(z, ylu) # check ylu
+
+            ylu <- range(z)
+            zc <- ylu[1] + (ylu[2] - ylu[1])*trs
+
+            I_fix <- z > yiter & z > zc
+            yiter[I_fix] <- z[I_fix] # upper envelope
             
+            # browser()
             fits[[i]] <- z
             # wnew <- wFUN(y, z, w, i, nptperyear, ...)
             # yiter <- z# update y with smooth values 

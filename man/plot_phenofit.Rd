@@ -4,16 +4,19 @@
 \alias{plot_phenofit}
 \title{plot_phenofit}
 \usage{
-plot_phenofit(d_fit, seasons, title = NULL, font.size = 14,
+plot_phenofit(d_fit, seasons, title = NULL,
+  title.ylab = "Vegetation Index", font.size = 14,
   show.legend = TRUE)
 }
 \arguments{
-\item{d_fit}{data.frame of curve fittings returned by \code{\link{get_fitting}}.}
+\item{d_fit}{data.frame of curve fittings returned by \code{\link[=get_fitting]{get_fitting()}}.}
 
-\item{seasons}{Growing season dividing object returned by \code{\link{season}}
-and \code{\link{season_mov}}.}
+\item{seasons}{Growing season dividing object returned by \code{\link[=season]{season()}}
+and \code{\link[=season_mov]{season_mov()}}.}
 
 \item{title}{String, title of figure.}
+
+\item{title.ylab}{String, title of \code{ylab}.}
 
 \item{font.size}{Font size of axis.text}
 
@@ -58,7 +61,7 @@ fit <- curvefits(
     INPUT, brks2,
     methods = c("AG", "Beck", "Elmore", "Zhang"), #,"klos", "Gu"
     wFUN = wFUN,
-    nextent = 2, maxExtendMonth = 2, minExtendMonth = 1, minPercValid = 0.2,
+    nextend = 2, maxExtendMonth = 2, minExtendMonth = 1, minPercValid = 0.2,
     print = TRUE, verbose = FALSE)
 ## visualization
 df_fit <- get_fitting(fit)

@@ -37,7 +37,7 @@ fits <- curvefits(
     INPUT, brks2,
     methods = c("AG", "Beck", "Elmore", "Zhang"), #,"klos", "Gu"
     wFUN = wFUN,
-    nextent = 2, maxExtendMonth = 2, minExtendMonth = 1, minPercValid = 0.2,
+    nextend = 2, maxExtendMonth = 2, minExtendMonth = 1, minPercValid = 0.2,
     print = TRUE, verbose = FALSE)
 
 ## 4. Phenological metric extraction
@@ -56,7 +56,6 @@ dev.off()
 # for shiny app: phenofit
 # save(df, st, file = "flux10_MOD13A1.rda")
 # shiny::runApp("inst/shiny/phenofit/", 80, TRUE)
-
 is_comp <- TRUE # FALSE
 
 if (is_comp) {

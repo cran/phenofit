@@ -4,25 +4,23 @@
 #'
 #' @inheritParams check_input
 #' @param nf number of frequencies to be considered above the zero frequency
-#' @param ylu [low, high] of time-series y (curve fitting values are constrained
-#' in the range of \code{ylu}.
+#' @param ylu `[low, high]` of time-series y (curve fitting values are constrained
+#' in the range of `ylu`.
 #' @param periodlen length of the base period, measured in virtual samples
 #'           (days, dekads, months, etc.). nptperyear in timesat.
 #' @param wFUN weights updating function, can be one of 'wTSM', 'wChen' and
 #' 'wBisquare'.
 #' @param iters How many times curve fitting is implemented.
 #' @param wmin Double, minimum weigth (i.e. weight of snow, ice and cloud).
-#' @param ... Additional parameters are passed to \code{wFUN}.
+#' @param ... Additional parameters are passed to `wFUN`.
 #'
 #' @author
 #' Wout Verhoef, NLR, Remote Sensing Dept. June 1998
 #' Mohammad Abouali (2011), Converted to MATLAB
 #' Dongdong Kong (2018), introduced to R and modified into weighted model.
 #' @return
-#' \itemize{
-#'    \item \code{ws} weights of every iteration
-#'    \item \code{zs} curve fittings of every iteration
-#' }
+#' * `ws`: weights of every iteration
+#' * `zs`: curve fittings of every iteration
 #'
 #' @examples
 #' library(phenofit)
@@ -85,12 +83,12 @@ wHANTS <- function(y, t, w, nf = 3, ylu, periodlen = 365, nptperyear,
         z <- mat %*% b; z <- z[, 1]
         # w = wFUN(y, yr, w, 0.5, i, nptperyear) #%wfact = 0.5
         w <- wFUN(y, z, w, i, nptperyear, ...)
-        # \code{check_fit} has constrained ylu
+        # \code{check_ylu} has constrained ylu
         # print(unique(wnew - w))
         # w <- wnew
         # w[z < ylu[1] | z > ylu[2] ] <- wmin
 
-        z <- check_fit(z, ylu) # very necessary
+        z <- check_ylu(z, ylu) # very necessary
         fits[[i]] <- z
     }
 

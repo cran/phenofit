@@ -4,14 +4,24 @@
 \alias{D}
 \alias{D1}
 \alias{D2}
+\alias{D1.fFIT}
+\alias{D2.fFIT}
 \alias{curvature}
+\alias{curvature.fFIT}
 \title{D}
 \usage{
 D1(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
 
 D2(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
 
+\method{D1}{fFIT}(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
+
+\method{D2}{fFIT}(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
+
 curvature(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
+
+\method{curvature}{fFIT}(fit, analytical = TRUE,
+  smoothed.spline = FALSE, ...)
 }
 \arguments{
 \item{fit}{A curve fitting object returned by \code{curvefit}.}
@@ -36,9 +46,9 @@ Get derivative of \code{phenofit} object.
 \code{curvature} curvature.
 }
 \details{
-If \code{fit$fun} has no gradient function or \code{smoothed.spline = TRUE}, 
-time-series smoothed by spline first, and get derivatives at last. 
-If \code{fit$fun} exists and \code{analytical = TRUE}, \code{smoothed.spline} 
+If \code{fit$fun} has no gradient function or \code{smoothed.spline = TRUE},
+time-series smoothed by spline first, and get derivatives at last.
+If \code{fit$fun} exists and \code{analytical = TRUE}, \code{smoothed.spline}
 will be ignored.
 }
 \examples{

@@ -6,16 +6,16 @@ sgolayS <- function(frame, d){
 #' 
 #' @inheritParams wHANTS
 #' @param frame Savitzky-Golay windows size
-#' @param d polynomial of degree
+#' @param d polynomial of degree. When d = 1, it becomes moving average.
 #' 
 #' @inherit wHANTS return
 #' 
 #' @references
-#' [1]. Chen, J., J\"onsson, P., Tamura, M., Gu, Z., Matsushita, B., Eklundh, L.,
+#' 1. Chen, J., J\"onsson, P., Tamura, M., Gu, Z., Matsushita, B., Eklundh, L.,
 #'      2004. A simple method for reconstructing a high-quality NDVI time-series
 #'      data set based on the Savitzky-Golay filter. Remote Sens. Environ. 91,
 #'      332-344. https://doi.org/10.1016/j.rse.2004.03.014. \cr
-#' [2]. https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter
+#' 2. https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter
 #' 
 #' @examples
 #' library(phenofit)
@@ -29,8 +29,9 @@ sgolayS <- function(frame, d){
 wSG <- function(y, w, nptperyear, ylu, wFUN = wTSM, iters = 2,
                    frame = floor(nptperyear/7)*2 + 1, d=2, ...){
     if (all(is.na(y))) return(y)
+    if (missing(w)) w <- rep(1, length(y))
 
-    S <- sgolayS(frame, d)
+    halfwin <- floor((frame-1)/2)
     
     yiter <- y
     fits  <- list()
@@ -38,10 +39,17 @@ wSG <- function(y, w, nptperyear, ylu, wFUN = wTSM, iters = 2,
 
     for (i in 1:iters){
         ws[[i]] <- w
-        z <- sgfitw_rcpp(yiter, w, S)[, 1]
-        wnew <- wFUN(y, z, w, i, nptperyear, ...)
+        z <- smooth_wSG(yiter, halfwin, d, w)
 
-        z <- check_fit(z, ylu)
+        if (is.null(wFUN)){
+            wnew <- w
+        } else {
+            wnew <- wFUN(y, z, w, i, nptperyear, ...)
+        }
+
+        if (!missing(ylu)) {
+            z <- check_ylu(z, ylu)        
+        }
         yiter[yiter < z] <- z[yiter < z] # upper envelope
         
         fits[[i]] <- z

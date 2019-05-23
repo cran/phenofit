@@ -25,19 +25,19 @@ grad.fFIT <- function(fit, tout){
 #' @title D
 #' @name D
 #' 
-#' @description Get derivative of \code{phenofit} object.
-#' \code{D1} first order derivative, \code{D2} second order derivative, n
-#' \code{curvature} curvature.
+#' @description Get derivative of `phenofit` object.
+#' `D1` first order derivative, `D2` second order derivative, n
+#' `curvature` curvature.
 #'
-#' @details If \code{fit$fun} has no gradient function or \code{smoothed.spline = TRUE}, 
+#' @details If `fit$fun` has no gradient function or `smoothed.spline = TRUE`, 
 #' time-series smoothed by spline first, and get derivatives at last. 
-#' If \code{fit$fun} exists and \code{analytical = TRUE}, \code{smoothed.spline} 
+#' If `fit$fun` exists and `analytical = TRUE`, `smoothed.spline` 
 #' will be ignored.
 #'  
-#' @param fit A curve fitting object returned by \code{curvefit}.
-#' @param analytical If true, \code{numDeriv} package \code{grad} and \code{hess}
-#' will be used; if false, \code{D1} and \code{D2} will be used.
-#' @param smoothed.spline Whether apply \code{smooth.spline} first?
+#' @param fit A curve fitting object returned by `curvefit`.
+#' @param analytical If true, `numDeriv` package `grad` and `hess`
+#' will be used; if false, `D1` and `D2` will be used.
+#' @param smoothed.spline Whether apply `smooth.spline` first?
 #' @param ... Other parameters will be ignored.
 #' 
 #' @return 
@@ -79,6 +79,7 @@ D1 <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...) UseMethod('
 #' @export
 D2 <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...) UseMethod('D2', fit)
 
+#' @rdname D
 #' @export
 D1.fFIT <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...){
     pred <- last(fit$zs)
@@ -111,6 +112,7 @@ D1.fFIT <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...){
     return(der1)
 }
 
+#' @rdname D
 #' @export
 D2.fFIT <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...){
     pred <- last(fit$zs)
@@ -150,6 +152,7 @@ D2.fFIT <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...){
 #' @export
 curvature <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...) UseMethod('curvature', fit)
 
+#' @rdname D
 #' @export
 curvature.fFIT <- function(fit, analytical = TRUE, smoothed.spline = FALSE, ...){
     derivs <- D2.fFIT(fit, analytical, smoothed.spline)

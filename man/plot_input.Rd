@@ -7,8 +7,8 @@
 plot_input(INPUT, wmin = 0.2, ...)
 }
 \arguments{
-\item{INPUT}{A list object with the elements of \code{t}, \code{y}, \code{w}, 
-\code{Tn} (optional) and \code{ylu}, returned by \code{\link{check_input}}.}
+\item{INPUT}{A list object with the elements of \code{t}, \code{y}, \code{w},
+\code{Tn} (optional) and \code{ylu}, returned by \code{\link[=check_input]{check_input()}}.}
 
 \item{wmin}{Double, minimum weigth (i.e. weight of snow, ice and cloud).}
 
@@ -34,7 +34,7 @@ nptperyear = 23
 ypeak_min  = 0.05
 
 dnew     <- add_HeadTail(d, nptperyear = nptperyear) # add one year in head and tail
-INPUT    <- check_input(dnew$t, dnew$y, dnew$w, nptperyear, 
+INPUT    <- check_input(dnew$t, dnew$y, dnew$w, d$QC_flag, nptperyear, 
                         maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 plot_input(INPUT)
 }

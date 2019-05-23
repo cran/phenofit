@@ -9,7 +9,7 @@
 \title{Phenology Extraction methods}
 \usage{
 PhenoTrs(fFIT, approach = c("White", "Trs"), trs = 0.5,
-  IsPlot = TRUE, ...)
+  asymmetric = TRUE, IsPlot = TRUE, ...)
 
 PhenoDeriv(fFIT, analytical = TRUE, smoothed.spline = FALSE,
   IsPlot = TRUE, show.lgd = TRUE, ...)
@@ -21,12 +21,15 @@ PhenoKl(fFIT, analytical = TRUE, smoothed.spline = FALSE,
   IsPlot = TRUE, show.lgd = TRUE, ...)
 }
 \arguments{
-\item{fFIT}{\code{fFIT} object returned by \code{\link{optim_pheno}}.}
+\item{fFIT}{\code{fFIT} object returned by \code{\link[=optim_pheno]{optim_pheno()}}.}
 
 \item{approach}{to be used to calculate phenology metrics.
 'White' (White et al. 1997) or 'Trs' for simple threshold.}
 
 \item{trs}{threshold to be used for approach "Trs", in (0, 1).}
+
+\item{asymmetric}{If true, background value in spring season and autumn season
+is regarded as different.}
 
 \item{IsPlot}{whether to plot?}
 

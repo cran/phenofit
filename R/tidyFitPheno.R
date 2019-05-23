@@ -2,7 +2,7 @@
 #'
 #' Tidy for every method with multiple years phenology data
 #'
-#' @param pheno Phenology metrics extracted from \code{get_pheno}
+#' @param pheno Phenology metrics extracted from `get_pheno`
 #'
 #' @examples
 #' library(phenofit)
@@ -41,10 +41,11 @@ tidyFitPheno <- function(pheno){
     #     years <- seq(year(origin), by = 1, length.out = length(pheno))
     #     names(pheno) <- years
     # }
-
+    names <- unlist(pheno[[1]]) %>% names()
     p_date <- ldply(pheno, doy2date, .id = "flag") %>%
         plyr::mutate(origin = ymd(paste0(substr(flag, 1, 4), "-01-01"))) %>%
-        reorder_name(c("flag", "origin"))
+        reorder_name(c("flag", "origin")) %>% 
+        set_colnames(c("flag", "origin", names))
 
     colnames(p_date) %<>% gsub("GU\\.|ZHANG\\.", "", .)
     phenonames <- setdiff(colnames(p_date),  c("flag", "origin", "meth"))
