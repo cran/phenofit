@@ -1,4 +1,4 @@
-c4d2a53eb16b0385b1f251792beea8c8 *DESCRIPTION
+7ed383ba7ca8bc0dc9ce387f1f31e826 *DESCRIPTION
 136efbf71b5edb543cbe6f7d3542fe07 *LICENSE
 0258eb8f110831012bd8492d3351da56 *NAMESPACE
 853a5fa65c3ecf594bfce29ca44d3e12 *NEWS.md
@@ -32,7 +32,7 @@ f40b565b992a76cf34e1014274748d87 *R/optim_pheno.R
 d6ea47261d4c217183d595fab2dd27f9 *R/phenofit-package.R
 0420490d3945053cdd6684194e2d2e67 *R/phenofit_loaddata.R
 952cda3994505126d7ae50bcc1630853 *R/phenofit_plot.R
-f3a675a53bd7f2136f93e64dd0762c54 *R/phenofit_shiny.R
+06088286ffa9ce90d8b4c0185137f3ce *R/phenofit_shiny.R
 e0a2ff2d25eb5f9295620686b19744c5 *R/plot_input.R
 d7bf8b966773d58184fb942c9f75d49b *R/plot_phenofit.R
 4926c698370da3bcd8f08e069a77c24c *R/plot_season.R
@@ -55,6 +55,7 @@ ef0695970fef48997e92adc45ad61ed2 *R/tidyFitPheno.R
 4f20d86089be79c043b6770ae728562b *R/tidy_MODIS.R
 4c69cf181e0fcbbc8da8631733880244 *R/tools.R
 6841cd95a591cbe162de32ca31827696 *R/wFUN.R
+52b79aded5d325ceaa6949e58219abf7 *README.md
 4b775635497ae160e50ae718f534404e *data/MOD13A1.rda
 b446055f2494888734e90308cd3b4b66 *inst/examples/compare_other_pkgs.R
 12f7714dfe3e2beb9b1b4c15b12c9ac7 *inst/examples/ex-FitDL.R
@@ -108,10 +109,10 @@ a46dc89bf02cc8feb0818d4063e5443f *man/logistics.Rd
 7d62c473089d69cdc7224a6d234f21a8 *man/movmean.Rd
 b9815f574841a5d32c862d96063d1372 *man/opt_FUN.Rd
 0ba7c47c2473d34feb9a8f6d245063be *man/optim_pheno.Rd
-4972870bdcee0e4265a29c1f6ab829a4 *man/phenofit.Rd
+6a95629253011b9ed6471f854fbf2449 *man/phenofit.Rd
 565beea94b56c3148d43f77242ce33b8 *man/phenofit_loaddata.Rd
 bb0dc5eb13282713fec5f7a9a830779b *man/phenofit_plot.Rd
-12f9a761a0a16791d5ea796291997471 *man/phenofit_shiny.Rd
+65889995f7ddb1d229ec06472ab683bf *man/phenofit_shiny.Rd
 d36ee23932fa55d5b037b68c3fd4399e *man/plot_input.Rd
 be5297046682535f96f229b200ae8a92 *man/plot_phenofit.Rd
 ed8d7b0ace06d88a155341f0d768b3a6 *man/plot_season.Rd
@@ -131,7 +132,7 @@ d61a91a438ae7f62e47120a470ae2c3b *man/v_curve.Rd
 02d9837b0a7b93c8ac76e85105115b4b *src/RcppExports.cpp
 9dc8a1957d04ec18a7d38599121d0440 *src/register_routines.c
 e4cc5b24dad96f2f8d7c66ddddf1c056 *src/season.cpp
-00a67f0badf7fa6d39af0e1ea3358a16 *src/smooth_wSG.cpp
+1b52ff939221b514f23609ba746f5508 *src/smooth_wSG.cpp
 098f6a428da0d883480517792ff2532a *src/smooth_whit.c
 65a6a43567a73d0af1f580346ddbb9b4 *src/wTSM.cpp
 770a8d14ad4016815a6c95d7b29d3c98 *tests/testthat.R
