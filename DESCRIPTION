@@ -1,13 +1,13 @@
 Package: phenofit
 Type: Package
 Title: Extract Remote Sensing Vegetation Phenology
-Version: 0.2.5-2
+Version: 0.2.7
 Authors@R: c(
     person("Dongdong", "Kong", role = c("aut", "cre"), email = "kongdd.sysu@gmail.com"),
-    person("Jianjian", "Cui", role = c("aut"), email = "cuijj6@mail2.sysu.edu.cn"),
     person("Mingzhong", "Xiao", role = c("aut"), email = "xmingzh@mail2.sysu.edu.cn"),
     person("Yongqiang", "Zhang", role = c("aut"), email = "yongqiang.zhang2014@gmail.com"),
-    person("Xihui", "Gu", role = c("aut"), email = "guxh@cug.edu.cn"))
+    person("Xihui", "Gu", role = c("aut"), email = "guxh@cug.edu.cn"), 
+    person("Jianjian", "Cui", role = c("aut"), email = "cuijj6@mail2.sysu.edu.cn"))
 Description: 
     The merits of 'TIMESAT' and 'phenopix' are adopted. Besides, a simple and 
     growing season dividing method and a practical snow elimination method 
@@ -25,23 +25,23 @@ Description:
 License: GPL-2 | file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 LinkingTo: Rcpp, RcppArmadillo
 Depends: R (>= 3.1)
 Imports: Rcpp, tibble, dplyr, purrr, stringr, tidyr, ggplot2,
         lubridate, data.table, spam, grid, gridExtra, magrittr, plyr,
         reshape2, zoo, optimx, ucminf, numDeriv, grDevices, utils,
-        stats, shiny, jsonlite, foreach, iterators
-Suggests: knitr, rmarkdown, testthat
+        stats, shiny, jsonlite, foreach, iterators, JuliaCall, methods
+Suggests: knitr, rmarkdown, testthat (>= 2.1.0)
 URL: https://github.com/kongdd/phenofit
 BugReports: https://github.com/kongdd/phenofit/issues
 NeedsCompilation: yes
-Packaged: 2019-06-07 01:03:59 UTC; kongd
+Packaged: 2020-04-02 08:23:21 UTC; kongdd
 Author: Dongdong Kong [aut, cre],
-  Jianjian Cui [aut],
   Mingzhong Xiao [aut],
   Yongqiang Zhang [aut],
-  Xihui Gu [aut]
+  Xihui Gu [aut],
+  Jianjian Cui [aut]
 Maintainer: Dongdong Kong <kongdd.sysu@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-06-07 08:00:08 UTC
+Date/Publication: 2020-04-02 11:40:03 UTC

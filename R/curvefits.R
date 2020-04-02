@@ -25,6 +25,9 @@
 #' less than `minPercValid`, curve fiting result is set to `NA`.
 #' @param print Whether to print progress information?
 #' @param use.rough Whether to use rough fitting smoothed time-series as input?
+#' @param use.y0 boolean. whether to use original `y0`, which is before the
+#' process of `check_input`.
+#'
 #' @param ... Other parameters will be ignore.
 #'
 #' @return fits Multiple phenofit object.
@@ -34,13 +37,15 @@
 #'
 #' @export
 curvefits <- function(INPUT, brks,
-                      wFUN = wTSM, iters = 2, wmin = 0.2,
-                      nextend = 2, maxExtendMonth = 3, minExtendMonth = 1,
+                      wFUN = wTSM, iters = 2, wmin = 0.1,
+                      nextend = 2, maxExtendMonth = 2, minExtendMonth = 1,
                       minT = 0,
                       methods = c('AG', 'Beck', 'Elmore', 'Gu', 'Klos', 'Zhang'),
                       minPercValid = 0.2,
                       print = TRUE,
-                      use.rough = FALSE, ...)
+                      use.rough = FALSE,
+                      use.y0 = TRUE,
+                      ...)
 {
     if (all(is.na(INPUT$y))) return(NULL)
 
@@ -54,10 +59,11 @@ curvefits <- function(INPUT, brks,
     doys <- as.numeric(difftime(t, date.origin, units = "day")) # + 1
 
     # Tn for background module
-    w <- w0 <- INPUT$w
-    y0     <- INPUT$y0 # original y
-    Tn     <- INPUT$Tn # if has no Tn, NULL will be return
-    has_Tn <- ifelse(is_empty(Tn), F, TRUE)
+    w  <- w0 <- INPUT$w
+    y0 <- if (use.y0) INPUT$y0 else INPUT$y
+
+    Tn <- INPUT$Tn # if has no Tn, NULL will be return
+    has_Tn <- ifelse(is_empty(Tn), FALSE, TRUE)
 
     # possible snow or cloud, replaced with Whittaker smoothing.
     I_all <- match(brks$whit$t, t) %>% rm_empty()
@@ -228,11 +234,11 @@ get_ylu <- function(y, years, w0, width, I, Imedian = TRUE, wmin = 0.2){
             # ylu_min; while a long way to ylu_max; 20180918
             # length(I) reflects nptperyear
             if (width > length(I)*2/12){
-                ylu_min <- aggregate(y_win, list(year = year_win), min)$x %>% median()
+                ylu_min <- median(aggregate.data.frame(y_win, list(year = year_win), min)$x)
             }
 
             if (width > length(I)*7/12){
-                ylu_max <- aggregate(y_win, list(year = year_win), max)$x %>% median()
+                ylu_max <- median(aggregate.data.frame(y_win, list(year = year_win), max)$x)
             }
         }
     }

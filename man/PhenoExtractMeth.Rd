@@ -8,17 +8,34 @@
 \alias{PhenoKl}
 \title{Phenology Extraction methods}
 \usage{
-PhenoTrs(fFIT, approach = c("White", "Trs"), trs = 0.5,
-  asymmetric = TRUE, IsPlot = TRUE, ...)
+PhenoTrs(
+  fFIT,
+  approach = c("White", "Trs"),
+  trs = 0.5,
+  asymmetric = TRUE,
+  IsPlot = TRUE,
+  ...
+)
 
-PhenoDeriv(fFIT, analytical = TRUE, smoothed.spline = FALSE,
-  IsPlot = TRUE, show.lgd = TRUE, ...)
+PhenoDeriv(
+  fFIT,
+  analytical = TRUE,
+  smoothed.spline = FALSE,
+  IsPlot = TRUE,
+  show.lgd = TRUE,
+  ...
+)
 
-PhenoGu(fFIT, analytical = TRUE, smoothed.spline = FALSE,
-  IsPlot = TRUE, ...)
+PhenoGu(fFIT, analytical = TRUE, smoothed.spline = FALSE, IsPlot = TRUE, ...)
 
-PhenoKl(fFIT, analytical = TRUE, smoothed.spline = FALSE,
-  IsPlot = TRUE, show.lgd = TRUE, ...)
+PhenoKl(
+  fFIT,
+  analytical = TRUE,
+  smoothed.spline = FALSE,
+  IsPlot = TRUE,
+  show.lgd = TRUE,
+  ...
+)
 }
 \arguments{
 \item{fFIT}{\code{fFIT} object returned by \code{\link[=optim_pheno]{optim_pheno()}}.}
@@ -54,13 +71,8 @@ will be used; if false, \code{D1} and \code{D2} will be used.}
 library(phenofit)
 # simulate vegetation time-series
 fFUN = doubleLog.Beck
-par  = c(
-    mn  = 0.1,
-    mx  = 0.7,
-    sos = 50,
-    rsp = 0.1,
-    eos = 250,
-    rau = 0.1)
+par  = c( mn  = 0.1 , mx  = 0.7 , sos = 50 , rsp = 0.1 , eos = 250, rau = 0.1)
+
 t    <- seq(1, 365, 8)
 tout <- seq(1, 365, 1)
 y <- fFUN(par, t)

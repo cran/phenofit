@@ -6,19 +6,59 @@
 \alias{stat_season}
 \title{Growing season dividing}
 \usage{
-season(INPUT, rFUN = wWHIT, wFUN = wTSM, iters = 2, wmin = 0.1,
-  lambda, nf = 3, frame = floor(INPUT$nptperyear/5) * 2 + 1,
-  minpeakdistance, r_max = 0.2, r_min = 0.05, ypeak_min = 0.1,
-  rtrough_max = 0.6, MaxPeaksPerYear = 2, MaxTroughsPerYear = 3,
-  calendarYear = FALSE, IsPlot = FALSE, plotdat = INPUT,
-  print = FALSE, adj.param = TRUE, ...)
+season(
+  INPUT,
+  rFUN = smooth_wWHIT,
+  wFUN = wTSM,
+  iters = 2,
+  wmin = 0.1,
+  lambda,
+  nf = 3,
+  frame = floor(INPUT$nptperyear/5) * 2 + 1,
+  minpeakdistance,
+  ypeak_min = 0.1,
+  r_max = 0.2,
+  r_min = 0.05,
+  rtrough_max = 0.6,
+  MaxPeaksPerYear = 2,
+  MaxTroughsPerYear = 3,
+  calendarYear = FALSE,
+  IsPlot = FALSE,
+  plotdat = INPUT,
+  print = FALSE,
+  adj.param = TRUE,
+  rm.closed = TRUE,
+  is.continuous = TRUE,
+  .check_season = TRUE,
+  ...
+)
 
-season_mov(INPUT, rFUN = wWHIT, wFUN = wTSM, iters = 2, wmin = 0.1,
-  IsOptim_lambda = FALSE, lambda = NULL, nf = 3,
-  frame = floor(INPUT$nptperyear/5) * 2 + 1, maxExtendMonth = 12,
-  calendarYear = FALSE, ..., IsPlot = TRUE, IsPlot.vc = FALSE,
-  IsPlot.OnlyBad = FALSE, plotdat = INPUT, print = TRUE,
-  titlestr = "")
+season_mov(
+  INPUT,
+  rFUN = smooth_wWHIT,
+  wFUN = wTSM,
+  iters = 2,
+  wmin = 0.1,
+  IsOptim_lambda = FALSE,
+  lambda = NULL,
+  nf = 3,
+  frame = floor(INPUT$nptperyear/5) * 2 + 1,
+  maxExtendMonth = 12,
+  calendarYear = FALSE,
+  r_min = 0.05,
+  rtrough_max = 0.6,
+  ...,
+  len_min = 45,
+  len_max = 650,
+  .check_season = TRUE,
+  years.run = NULL,
+  IsPlot = TRUE,
+  IsPlot.vc = FALSE,
+  IsPlot.OnlyBad = FALSE,
+  plotdat = INPUT,
+  print = TRUE,
+  titlestr = ""
+)
 
 stat_season(INPUT, brks)
 }
@@ -26,8 +66,8 @@ stat_season(INPUT, brks)
 \item{INPUT}{A list object with the elements of \code{t}, \code{y}, \code{w},
 \code{Tn} (optional) and \code{ylu}, returned by \code{\link[=check_input]{check_input()}}.}
 
-\item{rFUN}{Rough curve fitting function, can be one of \code{\link[=wSG]{wSG()}},
-\code{\link[=wWHIT]{wWHIT()}} and \code{\link[=wHANTS]{wHANTS()}}.}
+\item{rFUN}{Rough curve fitting function, can be one of \code{\link[=smooth_wSG]{smooth_wSG()}},
+\code{\link[=smooth_wWHIT]{smooth_wWHIT()}} and \code{\link[=smooth_wHANTS]{smooth_wHANTS()}}.}
 
 \item{wFUN}{weights updating function, can be one of \code{\link[=wTSM]{wTSM()}},
 \code{\link[=wChen]{wChen()}}, \code{\link[=wBisquare]{wBisquare()}} and \code{\link[=wSELF]{wSELF()}}.}
@@ -36,21 +76,23 @@ stat_season(INPUT, brks)
 
 \item{wmin}{Double, minimum weigth (i.e. weight of snow, ice and cloud).}
 
-\item{lambda}{The smoothing parameter of \code{\link[=wWHIT]{wWHIT()}}. For
+\item{lambda}{The smoothing parameter of \code{\link[=smooth_wWHIT]{smooth_wWHIT()}}. For
 \code{\link[=season_mov]{season_mov()}}, if lambda is \code{NULL}, \code{\link[=init_lambda]{init_lambda()}}
 will be used. Generally, it was set as 10000, 15, and 5 for daily, 8-day
 and 16-day inputs respectively.}
 
-\item{nf}{The parameter of \code{\link[=wHANTS]{wHANTS()}}, number of frequencies to be
+\item{nf}{The parameter of \code{\link[=smooth_wHANTS]{smooth_wHANTS()}}, number of frequencies to be
 considered above the zero frequency.}
 
-\item{frame}{The parameter of \code{\link[=wSG]{wSG()}}, moving window size. Suggested by
+\item{frame}{The parameter of \code{\link[=smooth_wSG]{smooth_wSG()}}, moving window size. Suggested by
 TIMESAT, default \code{frame = floor(nptperyear/7)*2 + 1}.}
 
 \item{minpeakdistance}{Numberic, in the unit of points (default as
-\code{nptperyear/6}). The minimum distance of two peaks. If the distance of two
+\code{nptperyear/12}). The minimum distance of two peaks. If the distance of two
 maximum extreme value less than \code{minpeakdistance}, only the real maximum
 value will be left.}
+
+\item{ypeak_min}{\code{y_peak >= ypeak_min}}
 
 \item{r_max}{Similar as \code{r_min}, The maximum threshold should
 be greater than \code{r_max}.}
@@ -58,8 +100,6 @@ be greater than \code{r_max}.}
 \item{r_min}{Threshold is defined as the difference of peak value with
 trough value. There are two threshold (left and right). The minimum threshold
 should be greater than r_min.}
-
-\item{ypeak_min}{ypeak >= ypeak_min}
 
 \item{rtrough_max}{\code{ytrough <= rtrough_max*A}, A is the amplitude of y.}
 
@@ -84,6 +124,13 @@ original data.table.}
 \item{adj.param}{Adjust rough curve fitting function parameters automatically,
 if too many or to less peak and trough values.}
 
+\item{rm.closed}{boolean. Whether check the two closest peaks (or troughs).}
+
+\item{is.continuous}{boolean. Whether the input is continuous? This parameter
+is for fluxsite site-year data.}
+
+\item{.check_season}{not used (only for debug)}
+
 \item{...}{For \code{\link[=season_mov]{season_mov()}}, Other parameters passed to
 \code{\link[=season]{season()}}; For \code{\link[=season]{season()}}, other parameters passed to
 \code{\link[=findpeaks]{findpeaks()}}.}
@@ -93,6 +140,12 @@ V-curve theory?}
 
 \item{maxExtendMonth}{Previous and subsequent \code{maxExtendMonth} data were added
 for every year curve fitting.}
+
+\item{len_min, len_max}{the minimum and maximum length (in the unit of days)
+of growing season}
+
+\item{years.run}{Numeric vector. Which years to run? If not specified, it is
+all years.}
 
 \item{IsPlot.vc}{Whether to plot V-curve optimized time-series.}
 
@@ -104,11 +157,12 @@ for every year curve fitting.}
 }
 \value{
 \itemize{
-\item \code{whit}: Rough fitting result.
-\item \code{dt}: Growing season dividing information.
+\item \code{whit}: A data.table of Rough fitting result, with the columns of
+(\code{t}, \code{y}, \code{witer1}, ..., \code{witerN}, \code{ziter1}, ..., \code{ziterN}).
+\item \code{dt}: A data.table of Growing season dividing information, with the columns
+of (\code{beg}, \code{peak}, \code{end}, \code{y_beg}, \code{y_peak}, \code{y_end}, \code{len}, \code{year},
+\code{season}, \code{flag}).
 }
-
-List object, \code{list(whit, dt)}
 }
 \description{
 Divide growing seasons according to rough fitting (\code{rFUN}) result .
@@ -123,7 +177,8 @@ and tail first by \code{add_HeadTail}.
 
 Finally, use \code{\link[=findpeaks]{findpeaks()}} to get local maximum and local minimum values.
 Two local minimum define a growing season.
-If two local minimum(maximum) are too closed, then only the smaller(biger) is left.
+If two local minimum(maximum) are too closed, then only the smaller(biger)
+is left.
 }
 \examples{
 library(phenofit)
@@ -154,15 +209,16 @@ INPUT    <- check_input(dnew$t, dnew$y, dnew$w, QC_flag = dnew$QC_flag,
      maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 # all year as a whole
 brks  <- season(INPUT,
-    rFUN = wWHIT, wFUN = wFUN,
+    rFUN = smooth_wWHIT, wFUN = wFUN,
     lambda = 10,
     plotdat = d, IsPlot = IsPlot, print = FALSE, IsPlot.OnlyBad = FALSE)
 # curve fitting by year
 brks2 <- season_mov(INPUT,
-    rFUN = wWHIT, wFUN = wFUN,
+    rFUN = smooth_wWHIT, wFUN = wFUN,
     lambda = 10,
     plotdat = d, IsPlot = IsPlot, print = FALSE, IsPlot.OnlyBad = FALSE)
 }
 \seealso{
 \code{\link[=findpeaks]{findpeaks()}}.
 }
+\keyword{internal}

@@ -8,7 +8,8 @@ Status](https://ci.appveyor.com/api/projects/status/github/kongdd/phenofit?branc
 [![codecov](https://codecov.io/gh/kongdd/phenofit/branch/master/graph/badge.svg)](https://codecov.io/gh/kongdd/phenofit)
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![CRAN](http://www.r-pkg.org/badges/version/phenofit)](https://cran.r-project.org/package=phenofit)
-[![CRAN\_Download\_Badge](http://cranlogs.r-pkg.org/badges/phenofit)](https://CRAN.R-project.org/package=phenofit)
+[![total](http://cranlogs.r-pkg.org/badges/grand-total/phenofit)](https://www.rpackages.io/package/phenofit)
+[![monthly](http://cranlogs.r-pkg.org/badges/phenofit)](https://www.rpackages.io/package/phenofit)
 
 A state-of-the-art **remote sensing vegetation phenology** extraction
 package: `phenofit`
@@ -24,9 +25,13 @@ package: `phenofit`
 
 ***Task lists***
 
-  - [ ] Improve computational efficiency of fine fitting;
-  - [x] Complete script automatic generating module of shinyapp;
+  - [ ] Test the performance of `phenofit` in multiple growing season
+    regions (e.g. the North China Plain);
   - [ ] Uncertainty analysis of curve fitting and phenological metrics;
+  - [x] shiny app has been moved to
+    [phenofit.shiny](https://github.com/kongdd/phenofit.shiny);
+  - [x] Complete script automatic generating module in shinyapp;
+  - [x] `Rcpp` improve double logistics optimization efficiency by 60%;
   - [x] Support spatial analysis;
   - [x] Support annual season in curve fitting;
   - [x] flexible fine fitting input ( original time-series or smoothed
@@ -45,18 +50,6 @@ You can install phenofit from github with:
 # install.packages("devtools")
 devtools::install_github("kongdd/phenofit")
 ```
-
-Run `shinyapp`:
-
-``` r
-shiny::runGitHub("phenofit", "kongdd", subdir = "inst/shiny/phenofit")
-# Or run locally
-shiny::runApp(system.file("shiny/phenofit", package = "phenofit"))
-```
-
-<!-- ![](man/Figure/phenofit_shiny.png)
-*<u>Figure 2. Shiny interface of `phenofit`.</u>*
- -->
 
 # Example
 
@@ -81,7 +74,7 @@ suppressMessages({
     library(lubridate)
     library(purrr)
     library(plyr)
-    
+    library(ggplot2)
     library(phenofit)
 })
 ```
@@ -194,7 +187,7 @@ par(mar = c(3, 2, 2, 1), mgp = c(3, 0.6, 0))
 lambda <- init_lambda(INPUT$y)
 # The detailed information of those parameters can be seen in `season`.
 # brks   <- season(INPUT, nptperyear,
-#                FUN = wWHIT, wFUN = wFUN, iters = 2,
+#                FUN = smooth_wWHIT, wFUN = wFUN, iters = 2,
 #                lambda = lambda,
 #                IsPlot = IsPlot, plotdat = d,
 #                south = d$lat[1] < 0,
@@ -202,7 +195,7 @@ lambda <- init_lambda(INPUT$y)
 #                max_MaxPeaksperyear =2.5, max_MinPeaksperyear = 3.5) #, ...
 # get growing season breaks in a 3-year moving window
 brks2 <- season_mov(INPUT, 
-                   FUN = wWHIT, wFUN = wFUN,
+                   FUN = smooth_wWHIT, wFUN = wFUN,
                    maxExtendMonth = 6, r_min = 0.1,
                    IsPlot = IsPlot, IsPlot.OnlyBad = FALSE, print = print)
 ```
@@ -241,14 +234,14 @@ print(l_param$AG)
 #  8 2007_1 2752. 0.165 0.483 0.0208  2    0.0150  2.88
 #  9 2008_1 3134. 0.177 0.492 0.0180  3.50 0.0199  6   
 # 10 2009_1 3525. 0.172 0.480 0.0133  5.40 0.0313  2   
-# 11 2010_1 3838. 0.194 0.487 0.0269  2    0.0146  2.39
-# 12 2011_1 4206. 0.189 0.464 0.0327  2    0.0135  6   
-# 13 2012_1 4558. 0.166 0.512 0.0473  2    0.0109  3.56
+# 11 2010_1 3841. 0.181 0.493 0.0238  2    0.0148  2   
+# 12 2011_1 4206. 0.190 0.464 0.0328  2    0.0135  6   
+# 13 2012_1 4558. 0.167 0.510 0.0490  2    0.0109  3.64
 # 14 2013_1 4966. 0.168 0.484 0.0140  6    0.0190  2   
-# 15 2014_1 5350. 0.204 0.479 0.0127  6    0.0376  6   
+# 15 2014_1 5303. 0.203 0.489 0.0344  2    0.0133  6   
 # 16 2015_1 5690. 0.215 0.494 0.0182  6    0.0275  4.81
-# 17 2016_1 6023. 0.193 0.484 0.0428  2    0.0126  4.93
-# 18 2017_1 6405. 0.171 0.447 0.0204  6    0.0129  3.65
+# 17 2016_1 6023. 0.194 0.484 0.0429  2    0.0126  4.99
+# 18 2017_1 6406. 0.171 0.449 0.0201  6    0.0129  3.52
 
 d_fit <- get_fitting(fit)
 ## Get GOF information
@@ -261,7 +254,7 @@ print(head(d_gof))
 # 3: 2000_1 Elmore 0.10060466 0.4950983 0.9021757 1.710497e-09 24
 # 4: 2000_1  Zhang 0.10059866 0.4951585 0.9036627 1.455586e-09 24
 # 5: 2001_1     AG 0.08808864 0.5879431 0.9037624 3.439665e-09 23
-# 6: 2001_1   Beck 0.08817911 0.5870963 0.9047721 3.093163e-09 23
+# 6: 2001_1   Beck 0.08817911 0.5870963 0.9047721 3.093164e-09 23
 
 # print(fit$fits$AG$`2002_1`$ws)
 print(fit$`2002_1`$fFIT$AG$ws)
@@ -276,14 +269,16 @@ print(fit$`2002_1`$fFIT$AG$ws)
 # [22] 0.2000000 0.2000000 0.2000000 0.2000000 0.2000000 0.2000000 0.2000000
 # [29] 0.2000000 0.2000000 0.2000000 1.0000000 1.0000000
 ## visualization
-# svg("Figure1_phenofit_curve_fitting.svg", 11, 7)
-# Cairo::CairoPDF(file_pdf, 11, 6) #
-# dev.off()
-g <- plot_phenofit(d_fit, brks2, titlestr)
+g <- plot_phenofit(d_fit, brks2, NULL, title.ylab = "NDVI", "Time",
+                   theme = coord_cartesian(xlim = c(ymd("2000-04-01"), ymd("2017-07-31"))))
 grid::grid.newpage(); grid::grid.draw(g)# plot to check the curve fitting
 ```
 
 <img src="man/Figure/curve fitting-1.svg" style="display: block; margin: auto;" />
+
+``` r
+# write_fig(g, "Figure1_phenofit_curve_fitting.pdf", 10, 6)
+```
 
 ## 2.5 Extract phenology
 
@@ -307,20 +302,27 @@ pheno <- get_pheno(fit[1:6], "Elmore", IsPlot = T)
 ``` r
 # print(str(pheno, 1))
 head(l_pheno$doy$AG)
-#      flag     origin TRS2.sos TRS2.eos TRS5.sos TRS5.eos DER.sos DER.pop
-# 1: 2000_1 2000-01-01      167      273      175      264     174     203
-# 2: 2001_1 2001-01-01      145      263      155      254     154     196
-# 3: 2002_1 2002-01-01      168      268      179      256     183     202
-# 4: 2003_1 2003-01-01      133      273      149      253     153     180
-# 5: 2004_1 2004-01-01      166      262      178      251     181     201
-# 6: 2005_1 2005-01-01      150      266      159      252     157     225
-#    DER.eos  UD  SD  DD  RD Greenup Maturity Senescence Dormancy
-# 1:     266 164 186 249 280     157      193        243      287
-# 2:     256 141 170 240 268     133      177        234      275
-# 3:     257 164 195 238 274     157      201        223      282
-# 4:     254 128 170 225 283     118      179        196      298
-# 5:     253 162 193 236 268     154      200        226      276
-# 6:     248 143 175 233 272     136      181        279       NA
+#      flag     origin TRS2.sos TRS2.eos TRS5.sos TRS5.eos TRS6.sos TRS6.eos
+# 1: 2000_1 2000-01-01      167      273      175      264      177      261
+# 2: 2001_1 2001-01-01      145      263      155      254      158      251
+# 3: 2002_1 2002-01-01      168      268      179      256      182      252
+# 4: 2003_1 2003-01-01      133      273      149      253      153      246
+# 5: 2004_1 2004-01-01      166      262      178      251      181      248
+# 6: 2005_1 2005-01-01      150      266      159      252      162      248
+#    DER.sos DER.pop DER.eos  UD  SD  DD  RD Greenup Maturity Senescence
+# 1:     174     203     266 164 186 249 280     157      193        243
+# 2:     154     196     256 141 170 240 268     133      177        234
+# 3:     183     202     257 164 195 238 274     157      201        223
+# 4:     153     180     254 128 170 225 283     118      179        196
+# 5:     181     201     253 162 193 236 268     154      200        226
+# 6:     157     225     248 143 175 233 272     136      181        279
+#    Dormancy
+# 1:      287
+# 2:      275
+# 3:      282
+# 4:      298
+# 5:      276
+# 6:       NA
 ```
 
 # **References**

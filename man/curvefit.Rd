@@ -4,8 +4,13 @@
 \alias{curvefit}
 \title{Fine curve fitting}
 \usage{
-curvefit(y, t = index(y), tout = t, methods = c("AG", "Beck",
-  "Elmore", "Gu", "Klos", "Zhang"), ...)
+curvefit(
+  y,
+  t = index(y),
+  tout = t,
+  methods = c("AG", "Beck", "Elmore", "Gu", "Klos", "Zhang"),
+  ...
+)
 }
 \arguments{
 \item{y}{Vegetation time-series index, numeric vector}
@@ -48,7 +53,7 @@ fFITs <- curvefit(y, t, tout, methods)
 }
 \seealso{
 \code{\link[=fFITs]{fFITs()}},
-\code{\link[=FitAG]{FitAG()}}, \code{\link[=FitDL.Beck]{FitDL.Beck()}},
+\code{\link[=FitDL.AG]{FitDL.AG()}}, \code{\link[=FitDL.Beck]{FitDL.Beck()}},
 \code{\link[=FitDL.Elmore]{FitDL.Elmore()}}, \code{\link[=FitDL.Gu]{FitDL.Gu()}},
 \code{\link[=FitDL.Klos]{FitDL.Klos()}}, \code{\link[=FitDL.Zhang]{FitDL.Zhang()}}
 }

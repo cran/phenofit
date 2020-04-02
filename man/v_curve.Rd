@@ -4,8 +4,7 @@
 \alias{v_curve}
 \title{v_curve}
 \usage{
-v_curve(INPUT, lg_lambdas, d = 2, IsPlot = FALSE, wFUN = wTSM,
-  iters = 2)
+v_curve(INPUT, lg_lambdas, d = 2, IsPlot = FALSE, wFUN = wTSM, iters = 2)
 }
 \arguments{
 \item{INPUT}{A list object with the elements of \code{t}, \code{y}, \code{w},
@@ -48,3 +47,4 @@ INPUT    <- check_input(dnew$t, dnew$y, dnew$w, nptperyear,
 lg_lambdas <- seq(0, 3, 0.1)
 r <- v_curve(INPUT, lg_lambdas, d = 2, IsPlot = TRUE)
 }
+\keyword{internal}

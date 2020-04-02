@@ -4,14 +4,27 @@
 \alias{optim_pheno}
 \title{optim_pheno}
 \usage{
-optim_pheno(prior, sFUN, y, t, tout, method, w, nptperyear, ylu,
-  iters = 2, wFUN = wTSM, verbose = FALSE, ...)
+optim_pheno(
+  prior,
+  sFUN,
+  y,
+  t,
+  tout,
+  method,
+  w,
+  nptperyear,
+  ylu,
+  iters = 2,
+  wFUN = wTSM,
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{prior}{A vector of initial values for the parameters for which optimal
 values are to be found. \code{prior} is suggested giving a column name.}
 
-\item{sFUN}{The name of fine curve fitting functions, can be one of \code{ 'FitAG', 'FitDL.Beck', 'FitDL.Elmore', 'FitDL.Gu' and 'FitDL.Klos', 'FitDL.Zhang'}.}
+\item{sFUN}{The name of fine curve fitting functions, can be one of \verb{ 'FitAG', 'FitDL.Beck', 'FitDL.Elmore', 'FitDL.Gu' and 'FitDL.Klos', 'FitDL.Zhang'}.}
 
 \item{y}{Numeric vector, vegetation index time-series}
 
@@ -19,10 +32,9 @@ values are to be found. \code{prior} is suggested giving a column name.}
 
 \item{tout}{Corresponding doy of prediction.}
 
-\item{method}{The name of optimization method to solve fine fitting, passed
-to \code{\link[=I_optim]{I_optim()}} or \code{\link[=I_optimx]{I_optimx()}}.
-\code{I_optim} supports \code{'BFGS','CG','Nelder-Mead', 'L-BFGS-B', 'nlm', 'nlminb', 'ucminf'};
-\code{I_optimx} supports \code{'spg','Rcgmin','Rvmmin', 'newuoa','bobyqa','nmkb','hjkb'}.}
+\item{method}{The name of optimization method to solve fine fitting, one of
+\verb{'BFGS','CG','Nelder-Mead', 'L-BFGS-B', 'nlm', 'nlminb', 'ucminf'} and
+\verb{'spg','Rcgmin','Rvmmin', 'newuoa','bobyqa','nmkb','hjkb'}.}
 
 \item{w}{(optional) Numeric vector, weights of \code{y}. If not specified,
 weights of all \code{NA} values will be \code{wmin}, the others will be 1.0.}
@@ -31,7 +43,7 @@ weights of all \code{NA} values will be \code{wmin}, the others will be 1.0.}
 Only \code{\link[=wTSM]{wTSM()}} needs \code{nptperyear}. If not specified,
 \code{nptperyear} will be calculated based on \code{t}.}
 
-\item{ylu}{\code{ymin, ymax}, which is used to force \code{ypred} in the
+\item{ylu}{\verb{ymin, ymax}, which is used to force \code{ypred} in the
 range of \code{ylu}.}
 
 \item{iters}{How many times curve fitting is implemented.}
@@ -49,4 +61,28 @@ fFIT object, see \code{\link[=fFIT]{fFIT()}} for details.
 \description{
 Interface of optimization functions for double logistics and other parametric
 curve fitting functions.
+}
+\examples{
+# library(magrittr)
+# library(purrr)
+
+# simulate vegetation time-series
+FUN = doubleLog_Beck
+par  = c( mn  = 0.1 , mx  = 0.7 , sos = 50 , rsp = 0.1 , eos = 250, rau = 0.1)
+par0 = c( mn  = 0.15, mx  = 0.65, sos = 100, rsp = 0.12, eos = 200, rau = 0.12)
+
+t    <- seq(1, 365, 8)
+tout <- seq(1, 365, 1)
+y <- FUN(par, t)
+
+methods = c("BFGS", "ucminf", "nlm", "nlminb")
+opt1 <- I_optim(par0, doubleLog_Beck, y, t, methods) # "BFGS", "ucminf", "nlm",
+# opt2 <- I_optimx(prior, fFUN, y, t, tout, )
+
+sFUN   = "doubleLog.Beck" # doubleLog.Beck
+r <- optim_pheno(par0, sFUN, y, t, tout, method = methods[4],
+                 nptperyear = 46, iters = 2, wFUN = wTSM, verbose = FALSE, use.julia = FALSE)
+}
+\seealso{
+\code{\link[=FitDL]{FitDL()}}
 }

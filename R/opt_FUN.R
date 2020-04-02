@@ -43,52 +43,7 @@
 #' * `fevals`: The number of calls to `objective`.
 #' 
 #' @seealso [optim_pheno()], [I_optim()]
-#' @examples
-#' library(phenofit)
-#' library(ggplot2)
-#' library(magrittr)
-#' library(purrr)
-#' 
-#' # simulate vegetation time-series
-#' fFUN = doubleLog.Beck
-#' par = c(
-#'   mn  = 0.1,
-#'   mx  = 0.7,
-#'   sos = 50,
-#'   rsp = 0.1,
-#'   eos = 250,
-#'   rau = 0.1)
-#' t    <- seq(1, 365, 8)
-#' tout <- seq(1, 365, 1)
-#' y <- fFUN(par, t)
-#' 
-#' # initial parameter
-#' par0 <- c(
-#'   mn  = 0.15,
-#'   mx  = 0.65,
-#'   sos = 100,
-#'   rsp = 0.12,
-#'   eos = 200,
-#'   rau = 0.12)
-#' 
-#' objective <- f_goal # goal function
-#' optFUNs   <- c("opt_ucminf", "opt_nlminb", "opt_nlm", "opt_optim") %>% set_names(., .)
-#' 
-#' opts <- lapply(optFUNs, function(optFUN){
-#'     optFUN <- get(optFUN)
-#'     opt <- optFUN(par0, objective, y = y, t = t, fun = fFUN)
-#'     opt$ysim <- fFUN(opt$par, t)
-#'     opt
-#' })
-#' 
-#' # visualization
-#' df   <- map(opts, "ysim") %>% as.data.frame() %>% cbind(t, y, .)
-#' pdat <- reshape2::melt(df, c("t", "y"), variable.name = "optFUN")
-#' 
-#' ggplot(pdat) + 
-#'     geom_point(data = data.frame(t, y), aes(t, y), size = 2) + 
-#'     geom_line(aes(t, value, color = optFUN), size = 0.9)
-#'
+#' @example man/examples/ex-opt_FUN.R
 NULL
 
 # ' * `gevals`: The number of calls to gradient function. This excludes
@@ -141,39 +96,6 @@ opt_ucminf <- function(par0, objective, ...){
       ans$nitns    <- NA
     }
     # ans$convergence <- NULL
-    ans[opt_vars]
-}
-
-
-#' @rdname opt_FUN
-#' @export
-opt_nlminb <- function(par0, objective, ...){
-    npar <- length(par0)
-    ans <- try(nlminb(start=par0, objective=objective, ...,
-      control = list(eval.max=1000, iter.max=1000, trace=0, abs.tol=0)),
-                     silent=TRUE)
-    # unify the format of optimization results
-    if (class(ans)[1] != "try-error") {
-        ans$convcode    <- ans$convergence
-        # Translate output to common format and names
-        ans$value       <- ans$objective
-        ans$objective   <- NULL
-        ans$fevals      <- ans$evaluations[[1]]
-        ans$gevals      <- ans$evaluations[[2]]
-        ans$evaluations <- NULL  # cleanup
-        ans$nitns       <- ans$iterations
-        ans$iterations  <- NULL
-    } else {
-        # bad result -- What to do?
-        ans <- list(fevals = NA)  # ans not yet defined, so set as list
-        ans$convcode <- 9999  # failed in run
-        # if (ctrl$trace > 0)
-          cat("nlminb function evaluation failure\n")
-        ans$value  <- NA#ctrl$badval
-        ans$par    <- rep(NA, npar)
-        ans$nitns  <- NA  # not used
-        ans$gevals <- NA  ## ?? missing 130929
-    }
     ans[opt_vars]
 }
 

@@ -13,6 +13,7 @@
 #' coef_kurtosis <- kurtosis(x)
 #' coef_skewness <- skewness(x)
 #' 
+#' @keywords internal
 #' @export
 kurtosis <- function (x, na.rm = FALSE, type = 3) {
     if (any(ina <- is.na(x))) {
@@ -72,13 +73,14 @@ skewness <- function (x, na.rm = FALSE, type = 3) {
 #' weighted CV
 #' @param x Numeric vector
 #' @param w weights of different point
-#' @export
 #'
 #' @return Named numeric vector, (mean, sd, cv).
 #' @examples
 #' library(phenofit)
 #' x = rnorm(100)
 #' coefs <- cv_coef(x)
+#' @keywords internal
+#' @export
 cv_coef <- function(x, w){
     if (missing(w)) w <- rep(1, length(x))
     if (length(x) == 0){
@@ -104,6 +106,7 @@ cv_coef <- function(x, w){
 #'
 #' @return `F` statistic and `R2` at significant level.
 #'
+#' @keywords internal
 #' @references
 #' Chen Yanguang (2012), Geographical Data analysis with MATLAB.
 #' @examples
@@ -130,8 +133,8 @@ R2_sign <- function(n, NumberOfPredictor = 2, alpha = 0.05){
 #' @param Y_sim Numeric vector, corresponding simulated values
 #' @param w Numeric vector, weights of every points. If w included, when
 #' calculating mean, Bias, MAE, RMSE and NSE, w will be taken into considered.
-#' @param include.cv If true, cv will be included.
 #' @param include.r If true, r and R2 will be included.
+#' @param include.cv If true, cv will be included.
 #' 
 #' @return
 #' * `RMSE` root mean square error
@@ -156,7 +159,7 @@ R2_sign <- function(n, NumberOfPredictor = 2, alpha = 0.05){
 #' GOF(Y_obs, Y_sim)
 #'
 #' @export
-GOF <- function(Y_obs, Y_sim, w, include.cv = FALSE, include.r = FALSE){
+GOF <- function(Y_obs, Y_sim, w, include.r = TRUE, include.cv = FALSE){
     if (missing(w)) w <- rep(1, length(Y_obs))
 
     # remove NA_real_ and Inf values in Y_sim, Y_obs and w

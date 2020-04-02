@@ -4,10 +4,23 @@
 \alias{curvefits}
 \title{Fine Curve fitting}
 \usage{
-curvefits(INPUT, brks, wFUN = wTSM, iters = 2, wmin = 0.2,
-  nextend = 2, maxExtendMonth = 3, minExtendMonth = 1, minT = 0,
+curvefits(
+  INPUT,
+  brks,
+  wFUN = wTSM,
+  iters = 2,
+  wmin = 0.1,
+  nextend = 2,
+  maxExtendMonth = 2,
+  minExtendMonth = 1,
+  minT = 0,
   methods = c("AG", "Beck", "Elmore", "Gu", "Klos", "Zhang"),
-  minPercValid = 0.2, print = TRUE, use.rough = FALSE, ...)
+  minPercValid = 0.2,
+  print = TRUE,
+  use.rough = FALSE,
+  use.y0 = TRUE,
+  ...
+)
 }
 \arguments{
 \item{INPUT}{A list object with the elements of 't', 'y', 'w', 'Tn' (option)
@@ -49,6 +62,9 @@ less than \code{minPercValid}, curve fiting result is set to \code{NA}.}
 
 \item{use.rough}{Whether to use rough fitting smoothed time-series as input?}
 
+\item{use.y0}{boolean. whether to use original \code{y0}, which is before the
+process of \code{check_input}.}
+
 \item{...}{Other parameters will be ignore.}
 }
 \value{
@@ -86,7 +102,7 @@ INPUT    <- check_input(dnew$t, dnew$y, dnew$w, QC_flag = dnew$QC_flag,
      maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 # Rough fitting and growing season dividing
 brks2 <- season_mov(INPUT,
-    rFUN = wWHIT, wFUN = wFUN,
+    rFUN = smooth_wWHIT, wFUN = wFUN,
     plotdat = d, IsPlot = IsPlot, print = FALSE, IsPlot.OnlyBad = FALSE)
 # Fine fitting
 fit <- curvefits(

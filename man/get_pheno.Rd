@@ -5,13 +5,27 @@
 \alias{get_pheno.fFITs}
 \title{get_pheno}
 \usage{
-get_pheno(fits, method, TRS = c(0.2, 0.5), analytical = TRUE,
-  smoothed.spline = FALSE, IsPlot = FALSE, showName_fitting = TRUE,
-  ...)
+get_pheno(
+  fits,
+  method,
+  TRS = c(0.2, 0.5, 0.6),
+  analytical = TRUE,
+  smoothed.spline = FALSE,
+  IsPlot = FALSE,
+  showName_fitting = TRUE,
+  ...
+)
 
-get_pheno.fFITs(fFITs, method, TRS = c(0.2, 0.5), analytical = TRUE,
-  smoothed.spline = FALSE, IsPlot = FALSE, title_left = "",
-  showName_pheno = TRUE)
+get_pheno.fFITs(
+  fFITs,
+  method,
+  TRS = c(0.2, 0.5),
+  analytical = TRUE,
+  smoothed.spline = FALSE,
+  IsPlot = FALSE,
+  title_left = "",
+  showName_pheno = TRUE
+)
 }
 \arguments{
 \item{fits}{A list of \code{\link[=fFITs]{fFITs()}} object, for a single curve fitting
@@ -53,13 +67,7 @@ Please note that only a single fine curve fitting method allowed here!
 library(phenofit)
 # simulate vegetation time-series
 fFUN = doubleLog.Beck
-par  = c(
-    mn  = 0.1,
-    mx  = 0.7,
-    sos = 50,
-    rsp = 0.1,
-    eos = 250,
-    rau = 0.1)
+par  = c( mn  = 0.1, mx  = 0.7, sos = 50, rsp = 0.1, eos = 250, rau = 0.1)
 t    <- seq(1, 365, 8)
 tout <- seq(1, 365, 1)
 y <- fFUN(par, t)

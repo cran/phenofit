@@ -20,8 +20,7 @@ D2(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
 
 curvature(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
 
-\method{curvature}{fFIT}(fit, analytical = TRUE,
-  smoothed.spline = FALSE, ...)
+\method{curvature}{fFIT}(fit, analytical = TRUE, smoothed.spline = FALSE, ...)
 }
 \arguments{
 \item{fit}{A curve fitting object returned by \code{curvefit}.}
@@ -73,3 +72,4 @@ d1 <- D1(fFIT)
 d2 <- D2(fFIT)
 d_k <- curvature(fFIT)
 }
+\keyword{internal}

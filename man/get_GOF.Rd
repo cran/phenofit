@@ -15,13 +15,13 @@ get_GOF.fFITs(fFITs)
 \item{fFITs}{\code{fFITs} object returned by \code{\link[=curvefit]{curvefit()}}.}
 }
 \value{
-\describe{
-\item{meth}{The name of fine curve fitting method}
-\item{RMSE}{Root Mean Square Error}
-\item{NSE}{Nash-Sutcliffe model efficiency coefficient}
-\item{R}{Pearson-Correlation}
-\item{pvalue}{pvalue of \code{R}}
-\item{n}{The number of observations}
+\itemize{
+\item \code{meth}: The name of fine curve fitting method
+\item \code{RMSE}: Root Mean Square Error
+\item \code{NSE} : Nash-Sutcliffe model efficiency coefficient
+\item \code{R}   : Pearson-Correlation
+\item \code{pvalue}: pvalue of \code{R}
+\item \code{n}   : The number of observations
 }
 }
 \description{
@@ -31,13 +31,7 @@ Goodness-of-fitting (GOF) of fine curve fitting results.
 library(phenofit)
 # simulate vegetation time-series
 fFUN = doubleLog.Beck
-par  = c(
-    mn  = 0.1,
-    mx  = 0.7,
-    sos = 50,
-    rsp = 0.1,
-    eos = 250,
-    rau = 0.1)
+par  = c( mn  = 0.1, mx  = 0.7, sos = 50, rsp = 0.1, eos = 250, rau = 0.1)
 t    <- seq(1, 365, 8)
 tout <- seq(1, 365, 1)
 y <- fFUN(par, t)

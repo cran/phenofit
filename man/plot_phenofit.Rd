@@ -4,9 +4,20 @@
 \alias{plot_phenofit}
 \title{plot_phenofit}
 \usage{
-plot_phenofit(d_fit, seasons, title = NULL,
-  title.ylab = "Vegetation Index", font.size = 14,
-  show.legend = TRUE)
+plot_phenofit(
+  d_fit,
+  seasons,
+  d_obs = NULL,
+  title = NULL,
+  title.xlab = "Time",
+  title.ylab = "Vegetation Index",
+  font.size = 14,
+  theme = NULL,
+  cex = 2,
+  shape = "point",
+  angle = 30,
+  show.legend = TRUE
+)
 }
 \arguments{
 \item{d_fit}{data.frame of curve fittings returned by \code{\link[=get_fitting]{get_fitting()}}.}
@@ -14,11 +25,22 @@ plot_phenofit(d_fit, seasons, title = NULL,
 \item{seasons}{Growing season dividing object returned by \code{\link[=season]{season()}}
 and \code{\link[=season_mov]{season_mov()}}.}
 
+\item{d_obs}{data.frame of original vegetation time series, with the columns
+of \code{t}, \code{y} and \code{QC_flag}. If not specified, it will be determined from \code{d_fit}.}
+
 \item{title}{String, title of figure.}
 
-\item{title.ylab}{String, title of \code{ylab}.}
+\item{title.xlab, title.ylab}{String, title of \code{xlab} and \code{ylab}.}
 
 \item{font.size}{Font size of axis.text}
+
+\item{theme}{ggplot theme to be applied}
+
+\item{cex}{point size for VI observation.}
+
+\item{shape}{the shape of input VI observation? \code{line} or \code{point}}
+
+\item{angle}{\code{text.x} angle}
 
 \item{show.legend}{Boolean}
 }
@@ -54,7 +76,7 @@ INPUT    <- check_input(dnew$t, dnew$y, dnew$w, QC_flag = dnew$QC_flag,
      maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 # Rough fitting and growing season dividing
 brks2 <- season_mov(INPUT,
-    rFUN = wWHIT, wFUN = wFUN,
+    rFUN = smooth_wWHIT, wFUN = wFUN,
     plotdat = d, IsPlot = IsPlot, print = FALSE, IsPlot.OnlyBad = FALSE)
 # Fine fitting
 fit <- curvefits(

@@ -1,16 +1,24 @@
+methods <- c(
+    'nlm', 'nlminb', 'ucminf',
+    "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", # "SANN", "Brent", # (optim)
+    'spg','Rcgmin','Rvmmin','newuoa','bobyqa','nmkb','hjkb')
+
 #' @name I_optim
 #' @title Interface of unified optimization functions.
 #'
 #' @description
-#' Caution that \pkg{optimx} speed is not so satisfied. So `I_optim`
-#' is present.
+#' \pkg{optimx} speed is not satisfied. So `I_optim` is present.
+#'
+#' - `I_optim`: Interface of unified optimization functions.
+#' - `I_optimx`: deprecated, which is about 10 times slower than `I_optim`.
 #'
 #' @inheritParams optim_pheno
 #' @param FUN Fine curve fitting function for goal function [f_goal()].
-#' @param method `method` can be one of `'BFGS','CG','Nelder-Mead',
+#' @param method `method` can be some of `'BFGS','CG','Nelder-Mead',
 #' 'L-BFGS-B', 'nlm', 'nlminb', 'ucminf'`. \cr
 #' For `I_optimx`, other methods are also supported,
 #' e.g. `'spg','Rcgmin','Rvmmin', 'newuoa','bobyqa','nmkb','hjkb'`.
+#' @param use.julia whether use julia nlminb optimization?
 #'
 #' @inherit opt_optim return
 #'
@@ -18,53 +26,22 @@
 #' [stats::nlm()], [optimx::optimx()],
 #' [ucminf::ucminf()]
 #'
-#' @examples
-#' library(ggplot2)
-#' library(magrittr)
-#' library(purrr)
-#' 
-#' # simulate vegetation time-series
-#' fFUN = doubleLog.Beck
-#' par = c(
-#'   mn  = 0.1,
-#'   mx  = 0.7,
-#'   sos = 50,
-#'   rsp = 0.1,
-#'   eos = 250,
-#'   rau = 0.1)
-#' t    <- seq(1, 365, 8)
-#' tout <- seq(1, 365, 1)
-#' y <- fFUN(par, t)
-#' 
-#' # initial parameter
-#' par0 <- c(
-#'   mn  = 0.15,
-#'   mx  = 0.65,
-#'   sos = 100,
-#'   rsp = 0.12,
-#'   eos = 200,
-#'   rau = 0.12)
-#' 
-#' objective <- f_goal # goal function
-#' optFUNs   <- c("opt_ucminf", "opt_nlminb", "opt_nlm", "opt_optim") %>% set_names(., .)
-#' prior <- as.matrix(par0) %>% t() %>% rbind(., .)
-#' 
-#' opt1 <- I_optim(prior, fFUN, y, t, tout, c("BFGS", "ucminf", "nlm", "nlminb"))
-#' opt2 <- I_optimx(prior, fFUN, y, t, tout, c("BFGS", "ucminf", "nlm", "nlminb"))
-#' 
-#' # microbenchmark::microbenchmark(
-#' #     I_optim(prior, fFUN, y, t, tout, c("BFGS", "ucminf", "nlm", "nlminb")),
-#' #     I_optimx(prior, fFUN, y, t, tout, c("BFGS", "ucminf", "nlm", "nlminb")),
-#' #     times = 2
-#' # )
+#' @example man/examples/ex-I_optim.R
+#'
+#' @keywords internal
 #' @export
-I_optim <- function(prior, FUN, y, t, tout, method = "BFGS", ...)
+I_optim <- function(prior, FUN, y, t, method = "BFGS", fn = f_goal, ...,
+    use.julia = FALSE)
 {
-    res <- vector("list", length(method)) %>% set_names(method)
+    pred = y*0
+    if (is.vector(prior)) prior <- t(prior)
+    prior2 <- set_colnames(prior, NULL)
 
+    colnames <- colnames(prior) %>% c("value", "fevals", "niter", "convcode")
+
+    res <- vector("list", length(method)) %>% set_names(method)
     for (i in seq_along(method)){
         meth <- method[i]
-        
         # Get optimization function
         optFUN_name <- ""
         if (meth %in% c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B")){
@@ -74,30 +51,34 @@ I_optim <- function(prior, FUN, y, t, tout, method = "BFGS", ...)
         } else {
             stop(sprintf("[e] method: %s not supported!", meth))
         }
-        optFUN <- get(optFUN_name, mode = "function")
 
-        # browser()
-        # optimize parameters
-        opt.lst <- alply(prior, 1, optFUN, method = meth,
-            objective = f_goal, fun = FUN, y = y, t = t, ...)
+        lst <- list()
+        for (j in 1:nrow(prior)) {
+            par0 <- prior2[j, ]
 
-        opt.df <- ldply(opt.lst, function(opt){
-            with(opt,
-                c(par, value = value,
-                    fevals = fevals[[1]], niter  = nitns,
-                    convcode = convcode)
-            )
-        }, .id = NULL ) #.id didn't work here
-        res[[i]] <- opt.df
+            if (optFUN_name == "opt_nlminb" && use.julia) {
+                FUN_name = attr(FUN, "name")
+                r   <- opt_nlminb_julia(par0, FUN_name, y, t, ...) # w, ylu
+                ans <- c(r$par, value = r$objective,
+                    fevals   = r$evaluations[[1]],
+                    niter    = r$iterations,
+                    convcode = r$convergence)
+            } else {
+                optFUN <- get(optFUN_name, mode = "function")
+                r   <-  optFUN(par0, method = meth,
+                    objective = fn, fun = FUN, y = y, t = t, pred = pred, ...)
+                ans <- c(r$par, value = r$value,
+                    fevals   = r$fevals[[1]], niter  = r$nitns,
+                    convcode = r$convcode)
+            }
+            lst[[j]] <- ans
+        }
+        res[[i]] <- do.call(rbind, lst) # %>% as.data.frame() %>% set_colnames(colnames)
     }
-    # browser()
-    melt_list(res, "method") # quickly return
+    res = do.call(rbind, res)
+    dimnames(res) <- list(rep(method, each = nrow(prior)), colnames)
+    res
 }
-
-methods <- c(
-    'nlm', 'nlminb', 'ucminf',
-    "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", # "SANN", "Brent", # (optim)
-    'spg','Rcgmin','Rvmmin','newuoa','bobyqa','nmkb','hjkb')
 
 #' @param verbose If `TRUE`, all optimization methods in
 #' [optimx::optimx()] are used, and print optimization information
@@ -105,24 +86,27 @@ methods <- c(
 #'
 #' @rdname I_optim
 #' @import optimx
+#'
+#' @keywords internal
 #' @export
-I_optimx <- function(prior, FUN, y, t, tout, method, verbose = FALSE, ...){
+I_optimx <- function(prior, FUN, y, t, method, verbose = FALSE, ...){
+    pred = y*0
+    if (is.vector(prior)) prior <- t(prior)
 
     # add method column
-    opt.df <- alply(prior, 1, optimx, .id = NULL,
-        fn = f_goal, fun = FUN, y = y, t = t,
-        method = method, ...,
+    opt.lst <- alply(prior, 1, optimx, method = method,
+        fn = f_goal, fun = FUN, y = y, t = t, pred = pred, ...,
         control = list(maxit = 1000, all.methods = verbose, dowarn = FALSE)
-    ) %>% map(~cbind(., method = rownames(.))) %>%
+    )
+    opt.df <- map(opt.lst, ~cbind(., method = rownames(.))) %>%
         do.call(rbind, .) %>% set_rownames(NULL)
     opt.df$kkt1 <- NULL
     opt.df$kkt2 <- NULL
 
-
     if (verbose){
         opt.df$method <- methods
         opt.df %<>% {.[with(., order(convcode, value, xtimes)), ]}
-        print(opt.df) #[, ]
+        print(opt.df)
 
         df <- opt.df[, c("method", "value", "xtimes", "convcode")]#
         # df %<>% reshape2::melt(id.vars = "method", variable.name = "index")

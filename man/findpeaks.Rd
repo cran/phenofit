@@ -4,9 +4,21 @@
 \alias{findpeaks}
 \title{findpeaks}
 \usage{
-findpeaks(x, IsDiff = TRUE, nups = 1, ndowns = nups, zero = "0",
-  peakpat = NULL, minpeakheight = -Inf, minpeakdistance = 1,
-  r_min = 0, r_max = 0, npeaks = 0, sortstr = FALSE, IsPlot = F)
+findpeaks(
+  x,
+  IsDiff = TRUE,
+  nups = 1,
+  ndowns = nups,
+  zero = "0",
+  peakpat = NULL,
+  minpeakheight = -Inf,
+  minpeakdistance = 1,
+  y_min = 0,
+  y_max = 0,
+  npeaks = 0,
+  sortstr = FALSE,
+  IsPlot = F
+)
 }
 \arguments{
 \item{x}{Numeric vector.}
@@ -23,7 +35,7 @@ just want to find the continue negative or positive values, just set
 of the same value: increasing, decreasing, or special}
 
 \item{peakpat}{define a peak as a regular pattern, such as the default
-pattern \code{[+]{1,}[-]{1,}}; if a pattern is provided, the parameters
+pattern \verb{[+]\{1,\}[-]\{1,\}}; if a pattern is provided, the parameters
 \code{nups} and \code{ndowns} are not taken into account}
 
 \item{minpeakheight}{The minimum (absolute) height a peak has to have
@@ -33,12 +45,12 @@ to be recognized as such}
 to be counted. If the distance of two maximum extreme value less than
 \code{minpeakdistance}, only the real maximum value will be left.}
 
-\item{r_min}{Threshold is defined as the difference of peak value with
+\item{y_min}{Threshold is defined as the difference of peak value with
 trough value. There are two threshold (left and right). The minimum threshold
-should be greater than r_min.}
+should be greater than \code{y_min}.}
 
-\item{r_max}{Similar as \code{r_min}, The maximum threshold should
-be greater than \code{r_max}.}
+\item{y_max}{Similar as \code{y_min}, The maximum threshold should
+be greater than \code{y_max}.}
 
 \item{npeaks}{the number of peaks to return. If \code{sortstr} = true, the
 largest npeaks maximum values will be returned; If \code{sortstr} = false,
@@ -64,7 +76,7 @@ for (i in seq(along=pos)) {
 }
 
 plot(pSignal, type="l", col="navy"); grid()
-x <- findpeaks(pSignal, npeaks=3, r_min=4, sortstr=TRUE)
+x <- findpeaks(pSignal, npeaks=3, y_min=4, sortstr=TRUE)
 points(val~pos, x$X, pch=20, col="maroon")
 
 }

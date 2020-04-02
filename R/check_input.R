@@ -26,6 +26,10 @@
 #' ungrowing season (see details in [phenofit::backval()]).
 #' @param wmin Double, minimum weight of bad points, which could be smaller
 #' the weight of snow, ice and cloud.
+#' @param wsnow Doulbe. Reset the weight of snow points, after get `ylu`.
+#' Snow flag is an important flag of ending of growing
+#' season. Snow points is more valuable than marginal points. Hence, the weight
+#' of snow should be great than that of `marginal`.
 #' @param missval Double, which is used to replace NA values in y. If missing,
 #' the default vlaue is `ylu[1]`.
 #' @param ymin If specified, `ylu[1]` is constrained greater than ymin. This
@@ -41,43 +45,50 @@
 #' by na.approx, it is unsuitable for large number continous missing segments,
 #' e.g. in the start or end of growing season.
 #' @param alpha Double value in `[0,1]`, quantile prob of ylu_min.
+#' @param alpha_high Double value in `[0,1]`, quantile prob of `ylu_max`. If not 
+#' specified, `alpha_high=alpha`.
+#' @param date_start,date_end starting and ending date of the original vegetation
+#' time-sereis (before `add_HeadTail`)
 #' @param ... Others will be ignored.
+#' @param mask_spike Boolean. Whether to remove spike values?
 #'
-#' @return A list object returned
-#' \itemize{
-#' \item{t } Numeric vector
-#' \item{y0} Numeric vector, original vegetation time-series.
-#' \item{y } Numeric vector, checked vegetation time-series, `NA` values
-#' are interpolated.
-#' \item{w } Numeric vector
-#' \item{Tn} Numeric vector
-#' \item{ylu} = `[ymin, ymax]`. `w_critical` is used to filter not too bad values.
+#' @return A list object returned:
+#' * `t` : Numeric vector
+#' * `y0`: Numeric vector, original vegetation time-series.
+#' * `y` : Numeric vector, checked vegetation time-series, `NA` values are interpolated.
+#' * `w` : Numeric vector
+#' * `Tn`: Numeric vector
+#' * `ylu`: = `[ymin, ymax]`. `w_critical` is used to filter not too bad values.
 #'
-#' If the percentage good values (w=1) is greater than 30\%, then `w_critical`=1.
+#'      If the percentage good values (w=1) is greater than 30\%, then `w_critical`=1.
 #'
-#' The else, if the percentage of w >= 0.5 points is greater than 10\%, then
-#' `w_critical`=0.5. In boreal regions, even if the percentage of w >= 0.5
-#' points is only 10\%, we still can't set `w_critical=wmin`.
+#'      The else, if the percentage of w >= 0.5 points is greater than 10\%, then
+#'      `w_critical`=0.5. In boreal regions, even if the percentage of w >= 0.5
+#'      points is only 10\%, we still can't set `w_critical=wmin`.
 #'
-#' We can't rely on points with the wmin weights. Then,  \cr
-#' `y_good = y[w >= w_critical ]`,  \cr
-#' `ymin = pmax( quantile(y_good, alpha/2), 0)`  \cr `ymax = max(y_good)`.
-#' }
+#'      We can't rely on points with the wmin weights. Then,  \cr
+#'      `y_good = y[w >= w_critical]`,  \cr
+#'      `ymin = pmax( quantile(y_good, alpha/2), 0)`  \cr `ymax = max(y_good)`.
 #'
 #' @seealso [phenofit::backval()]
 #' @example inst/examples/ex-check_input.R
 #' @export
 check_input <- function(t, y, w, QC_flag,
     nptperyear, south = FALSE, Tn = NULL,
-    wmin = 0.2, 
-    ymin, missval, 
-    maxgap, alpha = 0.02, ...)
+    wmin = 0.2,
+    wsnow = 0.8,
+    ymin, missval,
+    maxgap, alpha = 0.02, alpha_high = NULL, 
+    date_start = NULL, date_end = NULL,
+    mask_spike = TRUE,
+    ...)
 {
     if (missing(QC_flag)) QC_flag <- NULL
     if (missing(nptperyear)){
         nptperyear <- ceiling(365/as.numeric(difftime(t[2], t[1], units = "days")))
     }
     if (missing(maxgap)) maxgap = ceiling(nptperyear/12*1.5)
+    if (is.null(alpha_high)) alpha_high = alpha
 
     y0  <- y
     n   <- length(y)
@@ -95,13 +106,15 @@ check_input <- function(t, y, w, QC_flag,
         w_critical <- 0.5
     }
     y_good <- y[w >= w_critical] %>% rm_empty()
-    ylu    <- c(pmax( quantile(y_good, alpha/2), 0),
+    # alpha/2, alpha_high set to 0.05 for remote sensing (20200322)
+    ylu    <- c(pmax( quantile(y_good, alpha_high/2), 0), 
                quantile(y_good, 1 - alpha/2))
-    
+
     if (!missing(ymin) && !is.na(ymin)){
         # constrain back ground value
         ylu[1] <- pmax(ylu[1], ymin)
     }
+    A = diff(ylu)
     # When check_ylu, ylu_max is not used. ylu_max is only used for dividing
     # growing seasons.
 
@@ -117,25 +130,39 @@ check_input <- function(t, y, w, QC_flag,
     # generally, w == 0 mainly occur in winter. So it's seasonable to be assigned as minval
     ## 20180717 error fixed: y[w <= wmin]  <- missval # na is much appropriate, na.approx will replace it.
     # values out of range are setted to wmin weight.
-
-    w[y < ylu[1] | y > max(y_good)] <- wmin # | y > ylu[2], 
     # #based on out test marginal extreme value also often occur in winter
     # #This step is really dangerous! (checked at US-Me2)
-    y[y < ylu[1]]                  <- missval
-    y[y > ylu[2] & w < w_critical] <- missval
+    y[y < ylu[1]] <- missval
+    y[y > ylu[2] & w < pmin(w_critical + 0.01, 1)] <- missval
+
+    w[y0 < ylu[1] | y0 > max(y_good)] <- wmin # | y > ylu[2],
+
+    # 整治snow
+    if (!is.null(QC_flag)) {
+        I_snow = QC_flag == "snow" & y >= (ylu[1] + 0.2*A)
+        y[I_snow] = missval
+        w[QC_flag == "snow"] = wsnow
+    }
 
     ## 2. rm spike values
-    std   <- sd(y, na.rm = TRUE)
-    ymean <- cbind(y[c(1, 1:(n - 2), n-1)], y[c(2, 3:n, n)]) %>% rowMeans(na.rm = TRUE)
-    # y[abs(y - ymean) > std]
-    # which(abs(y - ymean) > std)
-    I_spike <- which(abs(y - ymean) > 2*std & w < w_critical) # 95.44% interval
-    y[I_spike] <- NA#missval
+    if (mask_spike) {
+        # 强化除钉值模块, 20191127
+        std   <- sd(y, na.rm = TRUE)
+        ymov <- cbind(y[c(1, 1:(n - 2), n-1)], y[c(2, 3:n, n)]) %>% rowMeans(na.rm = TRUE)
+        # ymov2 <- movmean(y, 1)
+        halfwin <- ceiling(nptperyear/36) # about 10-days
+        ymov2   <- movmean(y, halfwin = halfwin)
+        # which(abs(y - ymean) > std) & w <= w_critical
+        I_spike <- which(abs(y - ymov) > 2*std | abs(y - ymov2) > 2*std) # 95.44% interval, `(1- 2*pnorm(-2))*100`
 
+        y[I_spike]  <- NA # missval
+        y0[I_spike] <- missval # for debug
+    }
     ## 3. gap-fill NA values
     w[is.na(w) | is.na(y)] <- wmin
     w[w <= wmin] <- wmin
     # left missing values were interpolated by `na.approx`
+    # browser()
     y <- na.approx(y, maxgap = maxgap, na.rm = FALSE)
     # If still have na values after na.approx, just replace it with `missval`.
     y[is.na(y)] <- missval
@@ -143,9 +170,30 @@ check_input <- function(t, y, w, QC_flag,
     if (!is_empty(Tn)){
         Tn <- na.approx(Tn, maxgap = maxgap, na.rm = FALSE)
     }
-    list(t = t, y0 = y0, y = y, w = w, QC_flag = QC_flag, Tn = Tn, ylu = ylu, 
-        nptperyear = nptperyear, south = south)
+    list(t = t, y0 = y0, y = y, w = w, QC_flag = QC_flag, Tn = Tn, ylu = ylu,
+        nptperyear = nptperyear, south = south,
+        date_start = date_start, date_end = date_end)
 }
+# write_fig(expression({
+#     Ind = 1:length(y)
+#     # Ind = t <= "2004-01-01"
+#     lwd = 0.8
+#     print(I_spike)
+#     plot(t[Ind], y[Ind], type = "b", lwd = lwd)
+#     grid()
+#     lines(t, ymov, type = "b", col = "blue", lwd = lwd)
+#     points(t[I_spike], y[I_spike], col = "red")
+#     # points(t[I_spike2], y[I_spike2], col = "red")
+#     y[I_spike]  <- NA # missval
+#     y0[I_spike] <- missval # for debug
+#     plot(t[Ind], y[Ind], type = "l", lwd = lwd, col = "red")
+# }), "check_input.pdf", 10, 5)
+# write_fig(expression({
+    # plot(y0, type = "l")
+    # points(I_spike, y0[I_spike])
+    # lines(ymov, col = "blue")
+    # lines(ymov2, col = "green")
+# }), "b.pdf")
 
 #' check_ylu
 #'
@@ -155,9 +203,9 @@ check_input <- function(t, y, w, QC_flag,
 #'
 #' @param yfit Numeric vector, curve fitting result
 #' @param ylu limits of y value, `[ymin, ymax]`
-#' 
+#'
 #' @return yfit, the numeric vector in the range of `ylu`.
-#' 
+#'
 #' @export
 #' @examples
 #' check_ylu(1:10, c(2, 8))
@@ -170,7 +218,7 @@ check_ylu <- function(yfit, ylu){
 }
 
 # #' check_ylu2
-# #' 
+# #'
 # #' values out of ylu, set to be na and interpolate it.
 # #' @export
 # check_ylu2 <- function(y, ylu){

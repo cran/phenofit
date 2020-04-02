@@ -3,6 +3,7 @@
 \name{wSELF}
 \alias{wSELF}
 \alias{wTSM}
+\alias{wBisquare0}
 \alias{wBisquare}
 \alias{wChen}
 \alias{wKong}
@@ -12,7 +13,9 @@ wSELF(y, yfit, w, ...)
 
 wTSM(y, yfit, w, iter = 2, nptperyear, wfact = 0.5, ...)
 
-wBisquare(y, yfit, w, ..., wmin = 0.2)
+wBisquare0(y, yfit, w, ..., wmin = 0.2)
+
+wBisquare(y, yfit, w, ..., wmin = 0.2, .toUpper = TRUE)
 
 wChen(y, yfit, w, ..., wmin = 0.2)
 
@@ -37,6 +40,8 @@ weights of all \code{NA} values will be \code{wmin}, the others will be 1.0.}
 
 \item{wmin}{Double, minimum weight of bad points, which could be smaller
 the weight of snow, ice and cloud.}
+
+\item{.toUpper}{Boolean. Whether to approach the upper envelope?}
 }
 \value{
 wnew Numeric Vector, adjusted weights.
@@ -47,6 +52,7 @@ wnew Numeric Vector, adjusted weights.
 \item \code{wTSM} weight updating method in TIMESAT.
 \item \code{wBisquare} Bisquare weight update method. wBisquare has been
 modified to emphasis on upper envelope.
+\item \code{wBisquare0} Traditional Bisquare weight update method.
 \item \code{wChen} Chen et al., (2004) weight updating method.
 \item \code{wBeck} Beck et al., (2006) weigth updating method. wBeck need
 sos and eos input. The function parameter is different from others. It is
@@ -55,14 +61,14 @@ still not finished.
 }
 \references{
 \enumerate{
-\item Per J"onsson, P., Eklundh, L., 2004. TIMESAT - A program for analyzing
+\item Per J\"onsson, P., Eklundh, L., 2004. TIMESAT - A program for analyzing
 time-series of satellite sensor data. Comput. Geosci. 30, 833-845.
 https://doi.org/10.1016/j.cageo.2004.05.006. \cr
 \item https://au.mathworks.com/help/curvefit/smoothing-data.html#bq_6ys3-3 \cr
 \item Garcia, D., 2010. Robust smoothing of gridded data in one and higher
 dimensions with missing values. Computational statistics & data analysis,
 54(4), pp.1167-1178. \cr
-\item Chen, J., J"onsson, P., Tamura, M., Gu, Z., Matsushita, B., Eklundh, L.,
+\item Chen, J., J\"onsson, P., Tamura, M., Gu, Z., Matsushita, B., Eklundh, L.,
 2004. A simple method for reconstructing a high-quality NDVI time-series
 data set based on the Savitzky-Golay filter. Remote Sens. Environ. 91,
 332-344. https://doi.org/10.1016/j.rse.2004.03.014. \cr
@@ -74,7 +80,7 @@ https://doi.org/10.1016/j.rse.2005.10.021 \cr
 }
 }
 \author{
-wTSM is implemented by Per J"onsson, Malm"o University, Sweden
+wTSM is implemented by Per J\"onsson, Malm\"o University, Sweden
 \email{per.jonsson@ts.mah.se} and Lars Eklundh, Lund University, Sweden
 \email{lars.eklundh@nateko.lu.se}.
 And Translated into Rcpp by Dongdong Kong, 01 May 2018.

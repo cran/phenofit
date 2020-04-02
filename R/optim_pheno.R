@@ -3,7 +3,7 @@
 #' Interface of optimization functions for double logistics and other parametric
 #' curve fitting functions.
 #'
-#' @inheritParams wHANTS
+#' @inheritParams smooth_wHANTS
 #' @param prior A vector of initial values for the parameters for which optimal
 #' values are to be found. `prior` is suggested giving a column name.
 #' @param sFUN The name of fine curve fitting functions, can be one of `
@@ -15,16 +15,18 @@
 #' @param ylu `ymin, ymax`, which is used to force `ypred` in the
 #' range of `ylu`.
 #' @param tout Corresponding doy of prediction.
-#' @param method The name of optimization method to solve fine fitting, passed
-#' to [I_optim()] or [I_optimx()].
-#' `I_optim` supports `'BFGS','CG','Nelder-Mead',
-#' 'L-BFGS-B', 'nlm', 'nlminb', 'ucminf'`;
-#' `I_optimx` supports `'spg','Rcgmin','Rvmmin', 'newuoa','bobyqa','nmkb','hjkb'`.
+#' @param method The name of optimization method to solve fine fitting, one of
+#' `'BFGS','CG','Nelder-Mead', 'L-BFGS-B', 'nlm', 'nlminb', 'ucminf'` and
+#' `'spg','Rcgmin','Rvmmin', 'newuoa','bobyqa','nmkb','hjkb'`.
 #'
 #' @param verbose Whether to display intermediate variables?
 #' @param ... other parameters passed to [I_optim()] or [I_optimx()].
 #'
 #' @return fFIT object, see [fFIT()] for details.
+#'
+#' @seealso [FitDL()]
+#'
+#' @example man/examples/ex-optim_pheno.R
 #'
 #' @import optimx
 #' @export
@@ -35,6 +37,20 @@ optim_pheno <- function(
     iters = 2, wFUN = wTSM,
     verbose = FALSE, ...)
 {
+    sFUN = gsub("\\.", "_", sFUN )
+    FUN <- get(sFUN, mode = "function" )
+
+    ntime = length(t)
+    # add prior colnames
+    parnames <- attr(FUN, 'par')
+    if (is.vector(prior)) prior <- t(prior)
+    colnames(prior) <- parnames
+    npar = ncol(prior)
+
+    # opt.df: par, value, fevals, niter, convcode
+    J_VALUE    = npar + 1
+    J_CONVCODE = npar + 4
+
     methods_optim  <- c('BFGS','CG','Nelder-Mead', 'L-BFGS-B', 'nlm', 'nlminb', 'ucminf')
     methods_optimx <- c('spg','Rcgmin','Rvmmin', 'newuoa','bobyqa','nmkb','hjkb')
 
@@ -45,23 +61,14 @@ optim_pheno <- function(
     } else {
         stop(sprintf('optimization method (%s) is not supported!', method))
     }
-    # To improve the performance of optimization, \code{t} needs to be normalized.
-    # t_0    <- t
+    # To improve the performance of optimization, `t` needs to be normalized.
     tout_0 <- tout
-    # tout   <- tout - t[1] + 1
-    # t      <- t - t[1] + 1
 
     # check input parameters
     if (missing(w))          w   <- rep(1, length(y))
     if (missing(nptperyear)) nptperyear <- ceiling(365/mean(as.numeric(diff(t))))
     if (missing(ylu))        ylu <- range(y, na.rm = TRUE)
     A <- diff(ylu) # y amplitude
-
-    FUN <- get(sFUN, mode = "function" )
-    # add prior colnames
-    parnames <- attr(FUN, 'par')
-    colnames(prior) <- parnames
-    ############################################################################
 
     fits <- list()
     ws   <- list() #record weights for every iteration
@@ -77,45 +84,49 @@ optim_pheno <- function(
 
     for (i in 1:iters){
         ws[[i]] <- w
+        # dot = list(...)
+        # params = c(list(prior, FUN, y, t, method = method, w = w, verbose = verbose), dot[-4], use.julia = TRUE)
+        # do.call(I_optimFUN, params)
+        # save(list = ls(), file = "debug.rda")
         # pass verbose for optimx optimization methods selection
-        opt.df  <- I_optimFUN(prior, FUN, y, t, tout, method = method, w = w, verbose = verbose, ...)
-        # colnames(opt.df) <- c(parnames, colnames(opt.df)[(length(parnames) + 1):ncol(opt.df)])
+        opt.df  <- I_optimFUN(prior, FUN, y, t, method = method, w = w, verbose = verbose, ...)
+        # print(opt.df)
         if (verbose){
             fprintf('Initial parameters:\n')
             print(as_tibble(prior))
             print(opt.df)
         }
 
-        best <- which.min(opt.df$value)
+        best <- which.min(opt.df[, J_VALUE])
         if (is_empty(best)){
             warning("optimize parameters failed!")
         }else{
             # test for convergence if maximum iterations where reached - restart from best with more iterations
             # If RMSE is small enough, then accept it.
-            if (opt.df$convcode[best] != 0) {
+            if (opt.df[best, J_CONVCODE] != 0) { # convcode
                 # repeat with more maximum iterations if it did not converge
-                par <- opt.df[best, parnames] %>% as.matrix #best par generally
-                opt <- I_optimFUN(par, FUN, y, t, tout, method, w = w, verbose = verbose, ...)
+                par <- opt.df[best, 1:npar, drop = FALSE]  #best par generally
+                opt <- I_optimFUN(par, FUN, y, t, method, w = w, verbose = verbose, ...)
             } else { #if (opt.df$convcode[best] == 0)
-                opt <- opt.df[best, ]
+                opt <- opt.df[best, , drop = FALSE]
             }
 
-            # check whether convergence
-            if (opt$convcode != 0 & opt$value > 0.1*A) {
+            RMSE = sqrt(opt[1, J_VALUE])/ntime # SSE returned
+            # check whether convergence, only 1 row now
+            if (opt[1, J_CONVCODE] != 0 & RMSE > 0.1*A) {
                 warning("Not convergent!")
             }else{
-                par   <- opt[, parnames] %>% unlist()
+                par   <- opt[1, 1:npar, drop = FALSE]
                 # put opt par into prior for the next iteration
-                prior <- rbind(prior[1:(nrow(prior)-1), ], par, deparse.level = 0)
-                ypred <- FUN(par, tout)
+                prior <- rbind(prior[1:(nrow(prior)-1), ], par, deparse.level = 0) %>%
+                    unique.matrix()
+                FUN(par, tout, ypred)
                 # too much missing values
                 # if (sum(w == 0)/length(w) > 0.5) ypred <- ypred*NA
-
-                # fixed 04 March, 2018;
+                # to adapt wTS, set iter = i-1; #20180910
+                # nptperyear, wfact = 0.5)
                 w <- tryCatch(
-                    # to adapt wTS, set iter = i-1; #20180910
                     wFUN(y, FUN(par, t), w, i, nptperyear, ...),
-                    #nptperyear, wfact = 0.5)
                     error = function(e) {
                         message(sprintf('[%s]: %s', sFUN, e$message))
                         return(w) #return original w
