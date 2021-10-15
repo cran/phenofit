@@ -10,6 +10,7 @@
 \usage{
 PhenoTrs(
   fFIT,
+  t = NULL,
   approach = c("White", "Trs"),
   trs = 0.5,
   asymmetric = TRUE,
@@ -19,6 +20,7 @@ PhenoTrs(
 
 PhenoDeriv(
   fFIT,
+  t = NULL,
   analytical = TRUE,
   smoothed.spline = FALSE,
   IsPlot = TRUE,
@@ -26,10 +28,18 @@ PhenoDeriv(
   ...
 )
 
-PhenoGu(fFIT, analytical = TRUE, smoothed.spline = FALSE, IsPlot = TRUE, ...)
+PhenoGu(
+  fFIT,
+  t = NULL,
+  analytical = TRUE,
+  smoothed.spline = FALSE,
+  IsPlot = TRUE,
+  ...
+)
 
 PhenoKl(
   fFIT,
+  t = NULL,
   analytical = TRUE,
   smoothed.spline = FALSE,
   IsPlot = TRUE,
@@ -39,6 +49,9 @@ PhenoKl(
 }
 \arguments{
 \item{fFIT}{\code{fFIT} object returned by \code{\link[=optim_pheno]{optim_pheno()}}.}
+
+\item{t}{\code{date} or \code{doy} vector, with the same length as \code{ypred}. This parameter
+is for the Julia version \code{curvefits}.}
 
 \item{approach}{to be used to calculate phenology metrics.
 'White' (White et al. 1997) or 'Trs' for simple threshold.}
@@ -79,7 +92,7 @@ y <- fFUN(par, t)
 
 methods <- c("AG", "Beck", "Elmore", "Gu", "Zhang") # "Klos" too slow
 fFITs <- curvefit(y, t, tout, methods)
-fFIT  <- fFITs$fFIT$AG
+fFIT  <- fFITs$model$AG
 
 par(mfrow = c(2, 2))
 PhenoTrs(fFIT)

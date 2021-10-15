@@ -1,7 +1,7 @@
 Package: phenofit
 Type: Package
 Title: Extract Remote Sensing Vegetation Phenology
-Version: 0.2.7
+Version: 0.3.2
 Authors@R: c(
     person("Dongdong", "Kong", role = c("aut", "cre"), email = "kongdd.sysu@gmail.com"),
     person("Mingzhong", "Xiao", role = c("aut"), email = "xmingzh@mail2.sysu.edu.cn"),
@@ -17,26 +17,33 @@ Description:
     And 'optimx' is used to select best optimization method for different 
     curve fitting methods.
     Reference:
-    Dongdong Kong, R package: A state-of-the-art Vegetation Phenology extraction package, 
-    phenofit version 0.2.3, <https://github.com/kongdd/phenofit>;
+    Kong, D., (2020). R package: A state-of-the-art Vegetation Phenology extraction 
+    package, phenofit version 0.3.1, <doi:10.5281/zenodo.5150204>;
+    Kong, D., Zhang, Y., Wang, D., Chen, J., & Gu, X. (2020). Photoperiod Explains 
+    the Asynchronization Between Vegetation Carbon Phenology and Vegetation Greenness 
+    Phenology. Journal of Geophysical Research: Biogeosciences, 125(8), e2020JG005636. 
+    <doi:10.1029/2020JG005636>;
+    Kong, D., Zhang, Y., Gu, X., & Wang, D. (2019). A robust method for reconstructing 
+    global MODIS EVI time series on the Google Earth Engine. 
+    ISPRS Journal of Photogrammetry and Remote Sensing, 155, 13–24;
     Zhang, Q., Kong, D., Shi, P., Singh, V.P., Sun, P., 2018. Vegetation phenology 
     on the Qinghai-Tibetan Plateau and its response to climate change (1982–2013). 
     Agric. For. Meteorol. 248, 408–417. <doi:10.1016/j.agrformet.2017.10.026>.
 License: GPL-2 | file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.2
 LinkingTo: Rcpp, RcppArmadillo
 Depends: R (>= 3.1)
-Imports: Rcpp, tibble, dplyr, purrr, stringr, tidyr, ggplot2,
-        lubridate, data.table, spam, grid, gridExtra, magrittr, plyr,
-        reshape2, zoo, optimx, ucminf, numDeriv, grDevices, utils,
-        stats, shiny, jsonlite, foreach, iterators, JuliaCall, methods
-Suggests: knitr, rmarkdown, testthat (>= 2.1.0)
-URL: https://github.com/kongdd/phenofit
-BugReports: https://github.com/kongdd/phenofit/issues
+Imports: Rcpp, purrr, dplyr, magrittr, lubridate, data.table, zoo,
+        gridExtra, ggplot2, optimx, ucminf, numDeriv, JuliaCall,
+        methods, zeallot
+Suggests: knitr, rmarkdown, reshape2, spam, testthat (>= 2.1.0)
+URL: https://github.com/eco-hydro/phenofit
+BugReports: https://github.com/eco-hydro/phenofit/issues
+VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2020-04-02 08:23:21 UTC; kongdd
+Packaged: 2021-10-15 10:14:15 UTC; kongdd
 Author: Dongdong Kong [aut, cre],
   Mingzhong Xiao [aut],
   Yongqiang Zhang [aut],
@@ -44,4 +51,4 @@ Author: Dongdong Kong [aut, cre],
   Jianjian Cui [aut]
 Maintainer: Dongdong Kong <kongdd.sysu@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-04-02 11:40:03 UTC
+Date/Publication: 2021-10-15 10:50:02 UTC

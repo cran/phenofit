@@ -4,29 +4,21 @@
 #' @param ... other parameter will be ignored.
 #' @param show.y0 boolean. Whether to show original time-series `y0` or processed time-series `y` by
 #' [check_input()]?
-#' 
+#' @param ylab y axis title
+#'
 #' @examples
 #' library(phenofit)
-#' data("MOD13A1")
-#'
-#' dt <- tidy_MOD13.gee(MOD13A1$dt)
-#' st <- MOD13A1$st
-#'
-#' sitename <- dt$site[1]
-#' d     <- dt[site == sitename, ] # get the first site data
-#' sp    <- st[site == sitename, ] # station point
+#' data("CA_NS6"); d = CA_NS6
 #' # global parameter
 #' IsPlot = TRUE
-#' print  = FALSE
 #' nptperyear = 23
 #' ypeak_min  = 0.05
 #'
-#' dnew     <- add_HeadTail(d, nptperyear = nptperyear) # add one year in head and tail
-#' INPUT    <- check_input(dnew$t, dnew$y, dnew$w, d$QC_flag, nptperyear,
+#' INPUT    <- check_input(d$t, d$y, d$w, d$QC_flag, nptperyear,
 #'                         maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 #' plot_input(INPUT)
 #' @export
-plot_input <- function(INPUT, wmin = 0.2, show.y0 = TRUE, ...){
+plot_input <- function(INPUT, wmin = 0.2, show.y0 = TRUE, ylab = "VI", ...){
     y  <- INPUT$y
     y0 <- INPUT$y0
     t <- INPUT$t
@@ -60,22 +52,24 @@ plot_input <- function(INPUT, wmin = 0.2, show.y0 = TRUE, ...){
     I = which(t >= date_start & t <= date_end)
     # end of parameters check
 
-    # nptperyear <- INPUT$nptperyear
     npt <- length(y)
-    # show grid lines
     par(mgp = c(1.5, 0.5, 0)) #oma = c(1, 2, 3, 1)
     # at <- t[seq(1, npt, nptperyear)]
     # fmt <- ifelse(yday(at[1]) == 1, "%Y", "%Y/%m/%d")
     # axis(side=1, at = at, labels = format(at, fmt))
-
-    # colors <- c("grey60", "#00BFC4", "#C77CFF", "#F8766D", "blue", "red", "black")
     pch    <- c(19, 15, 17) # 4
     main <- 'Vegetation Index'
+    main = NULL
+
     if (!is.null(years) && length(unique(years)) < 3){
-        plot(t[I], y[I], type = "l", xaxt="n", ann = FALSE, main = main, ...)
+        plot(t[I], y[I], type = "l", xaxt = "n", ylab = ylab, xlab = "Time", main = main, ...) # , ann = FALSE
         axis.Date(1, at=seq(min(t), max(t), by="month"), format="%Y-%m")
     } else {
-        plot(t[I], y[I], type = "l", ann = FALSE, main = main, ...)
+        plot(t[I], y[I], type = "l", ylab = ylab, xlab = "Time", main = main, xlim = xlim, ...)
+        year_min = min(years)
+        year_max = max(years)
+        axis.Date(1, at=seq(make_date(year_min), make_date(year_max), by="year"),
+                  format="%Y")
     }
 
     show.goodPoints = INPUT$nptperyear < 90
@@ -97,7 +91,7 @@ plot_input <- function(INPUT, wmin = 0.2, show.y0 = TRUE, ...){
         t_grids  <- seq.Date(date_beg, date_end, by = "year")
         abline(v = t_grids, col = "grey60", lty = 3)
     }
-    grid(nx = NA, NULL)
+    # grid(nx = NA, NULL)
     ylu <- INPUT$ylu
     if (!is.null(ylu)) abline(h=ylu, col="red", lty=2) # show ylims
 }

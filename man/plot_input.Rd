@@ -4,7 +4,7 @@
 \alias{plot_input}
 \title{Plot INPUT returned by check_input}
 \usage{
-plot_input(INPUT, wmin = 0.2, show.y0 = TRUE, ...)
+plot_input(INPUT, wmin = 0.2, show.y0 = TRUE, ylab = "VI", ...)
 }
 \arguments{
 \item{INPUT}{A list object with the elements of \code{t}, \code{y}, \code{w},
@@ -15,6 +15,8 @@ plot_input(INPUT, wmin = 0.2, show.y0 = TRUE, ...)
 \item{show.y0}{boolean. Whether to show original time-series \code{y0} or processed time-series \code{y} by
 \code{\link[=check_input]{check_input()}}?}
 
+\item{ylab}{y axis title}
+
 \item{...}{other parameter will be ignored.}
 }
 \description{
@@ -22,22 +24,13 @@ Plot INPUT returned by check_input
 }
 \examples{
 library(phenofit)
-data("MOD13A1")
-
-dt <- tidy_MOD13.gee(MOD13A1$dt)
-st <- MOD13A1$st
-
-sitename <- dt$site[1]
-d     <- dt[site == sitename, ] # get the first site data
-sp    <- st[site == sitename, ] # station point
+data("CA_NS6"); d = CA_NS6
 # global parameter
 IsPlot = TRUE
-print  = FALSE
 nptperyear = 23
 ypeak_min  = 0.05
 
-dnew     <- add_HeadTail(d, nptperyear = nptperyear) # add one year in head and tail
-INPUT    <- check_input(dnew$t, dnew$y, dnew$w, d$QC_flag, nptperyear,
+INPUT    <- check_input(d$t, d$y, d$w, d$QC_flag, nptperyear,
                         maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 plot_input(INPUT)
 }

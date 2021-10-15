@@ -4,6 +4,7 @@
 \alias{FitDL}
 \alias{FitDL.Zhang}
 \alias{FitDL.AG}
+\alias{FitDL.AG2}
 \alias{FitDL.Beck}
 \alias{FitDL.Elmore}
 \alias{FitDL.Gu}
@@ -13,6 +14,8 @@
 FitDL.Zhang(y, t = index(y), tout = t, method = "nlm", w, ...)
 
 FitDL.AG(y, t = index(y), tout = t, method = "nlminb", w, ...)
+
+FitDL.AG2(y, t = index(y), tout = t, method = "nlminb", w, ...)
 
 FitDL.Beck(y, t = index(y), tout = t, method = "nlminb", w, ...)
 
@@ -80,6 +83,6 @@ of Plant Community Photosynthesis Across a Range of Vegetation Types,
 in: Noormets, A. (Ed.), Phenology of Ecosystem Processes: Applications
 in Global Change Research. Springer New York, New York, NY, pp. 35-58.
 https://doi.org/10.1007/978-1-4419-0026-5_2. \cr
-\item https://github.com/kongdd/phenopix/blob/master/R/FitDoubleLogGu.R
+\item https://github.com/cran/phenopix/blob/master/R/FitDoubleLogGu.R
 }
 }

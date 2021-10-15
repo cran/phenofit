@@ -19,7 +19,7 @@
 #' @examples
 #' library(phenofit)
 #' data("MOD13A1")
-#' dt <- tidy_MOD13.gee(MOD13A1$dt)
+#' dt <- tidy_MOD13(MOD13A1$dt)
 #' y <- dt[site == "AT-Neu", ][1:120, y]
 #' 
 #' plot(y, type = "b")
@@ -60,12 +60,12 @@ whit2 <- function(y, lambda, w = rep(1, ny))
 #' @references
 #' 1. Eilers, P.H.C., 2003. A perfect smoother. Anal. Chem. https://doi.org/10.1021/ac034173t \cr
 #' 2. Frasso, G., Eilers, P.H.C., 2015. L- and V-curves for optimal smoothing. Stat.
-#'      Modelling 15, 91–111. https://doi.org/10.1177/1471082X14549288
+#'      Modelling 15, 91-111. https://doi.org/10.1177/1471082X14549288
 #' 
 #' @examples
 #' library(phenofit)
 #' data("MOD13A1")
-#' dt <- tidy_MOD13.gee(MOD13A1$dt)
+#' dt <- tidy_MOD13(MOD13A1$dt)
 #' d <- dt[site == "AT-Neu", ]
 #' 
 #' l <- check_input(d$t, d$y, d$w, nptperyear=23)

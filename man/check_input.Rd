@@ -35,7 +35,7 @@ weights of all \code{NA} values will be \code{wmin}, the others will be 1.0.}
 
 \item{QC_flag}{Factor (optional) returned by \code{qcFUN}, levels should be
 in the range of \code{c("snow", "cloud", "shadow", "aerosol", "marginal", "good")}, others will be categoried into \code{others}. \code{QC_flag} is
-used for visualization in \code{\link[=get_pheno]{get_pheno()}} and \code{\link[=plot_phenofit]{plot_phenofit()}}.}
+used for visualization in \code{\link[=get_pheno]{get_pheno()}} and \code{\link[=plot_curvefits]{plot_curvefits()}}.}
 
 \item{nptperyear}{Integer, number of images per year.}
 
@@ -44,7 +44,7 @@ following year 31 June; In north hemisphere, growing year is 1 Jan to 31 Dec.}
 
 \item{Tn}{Numeric vector, night temperature, default is null. If provided,
 Tn is used to help divide ungrowing period, and then get background value in
-ungrowing season (see details in \code{\link[phenofit:backval]{phenofit::backval()}}).}
+ungrowing season (see details in \code{\link[=backval]{backval()}}).}
 
 \item{wmin}{Double, minimum weight of bad points, which could be smaller
 the weight of snow, ice and cloud.}
@@ -71,9 +71,9 @@ is inappropriate for middle growing season points. Interpolating all values
 by na.approx, it is unsuitable for large number continous missing segments,
 e.g. in the start or end of growing season.}
 
-\item{alpha}{Double value in \verb{[0,1]}, quantile prob of ylu_min.}
+\item{alpha}{Double, in \verb{[0,1]}, quantile prob of ylu_min.}
 
-\item{alpha_high}{Double value in \verb{[0,1]}, quantile prob of \code{ylu_max}. If not
+\item{alpha_high}{Double, \verb{[0,1]}, quantile prob of \code{ylu_max}. If not
 specified, \code{alpha_high=alpha}.}
 
 \item{date_start, date_end}{starting and ending date of the original vegetation
@@ -109,33 +109,16 @@ Check input data, interpolate NA values in y, remove spike values, and set
 weights for NA in y and w.
 }
 \examples{
-library(phenofit)
-data("MOD13A1")
+data("CA_NS6")
+d = CA_NS6
+head(d)
 
-df <- tidy_MOD13.gee(MOD13A1$dt)
-st <- MOD13A1$st
-
-date_start <- as.Date('2013-01-01')
-date_end   <- as.Date('2016-12-31')
-
-sitename <- 'CA-NS6' # df$site[1]
-d     <- df[site == sitename & (date >= date_start & date <= date_end), ]
-sp    <- st[site == sitename, ]
-south <- sp$lat < 0
 nptperyear <- 23
-
-# global parameter
-IsPlot = TRUE
-print  = FALSE
-ypeak_min  = 0.05
-wFUN = wTSM
-
-# add one year in head and tail
-dnew     <- add_HeadTail(d, south = south, nptperyear = nptperyear) 
-INPUT    <- check_input(dnew$t, dnew$y, dnew$w, QC_flag = dnew$QC_flag,
-     nptperyear = nptperyear, south = south, 
+INPUT <- check_input(d$t, d$y, d$w, QC_flag = d$QC_flag,
+     nptperyear = nptperyear, south = FALSE, 
      maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
+plot_input(INPUT)
 }
 \seealso{
-\code{\link[phenofit:backval]{phenofit::backval()}}
+\code{\link[=backval]{backval()}}
 }

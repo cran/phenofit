@@ -6,17 +6,15 @@ wFUN = wTSM # wBisquare #
 # The `maxExtendMonth` in season_mov and curvefits is different
 # lambda   <- init_lambda(INPUT$y) # lambda for whittaker
 brks2 <- season_mov(INPUT,
-    rFUN = smooth_wWHIT, wFUN = wFUN,
-    plotdat = d, IsPlot = IsPlot, IsPlot.OnlyBad = F, print = F)
-
+    options = list(rFUN = smooth_wWHIT, wFUN = wFUN)
+)
 param <- list(
     INPUT, brks2,
-    methods = c("AG", "Zhang", "Beck", "Elmore", 'Gu'), #,"klos",
-    verbose = F,
-    wFUN = wFUN,
-    nextend = 2, maxExtendMonth = 2, minExtendMonth = 1,
-    minPercValid = 0.2,
-    print = FALSE
+    options = list(
+        methods = c("AG", "Beck", "Elmore", "Gu", "Zhang"), # ,"klos",
+        wFUN = wFUN, nextend = 2, maxExtendMonth = 3, minExtendMonth = 1,
+        minPercValid = 0.2, use.rough = TRUE
+    )
 )
 
 fit  <- do.call(curvefits, param)
@@ -37,7 +35,7 @@ expect_silent({
         stat  <- get_GOF(fit)
         d_fit <- get_fitting(fit)
 
-        g <- plot_phenofit(d_fit, brks2)
+        g <- plot_curvefits(d_fit, brks2)
         grid::grid.newpage(); grid::grid.draw(g)
     })
 })

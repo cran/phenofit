@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // clogistic
 void clogistic(NumericVector par, NumericVector t, NumericVector pred);
 RcppExport SEXP _phenofit_clogistic(SEXP parSEXP, SEXP tSEXP, SEXP predSEXP) {
@@ -107,16 +112,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// check_season
-void check_season(DataFrame d, bool rm_closed, double rtrough_max, double r_min);
-RcppExport SEXP _phenofit_check_season(SEXP dSEXP, SEXP rm_closedSEXP, SEXP rtrough_maxSEXP, SEXP r_minSEXP) {
+// rcpp_season_filter
+void rcpp_season_filter(DataFrame d, bool rm_closed, double rtrough_max, double r_min);
+RcppExport SEXP _phenofit_rcpp_season_filter(SEXP dSEXP, SEXP rm_closedSEXP, SEXP rtrough_maxSEXP, SEXP r_minSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< DataFrame >::type d(dSEXP);
     Rcpp::traits::input_parameter< bool >::type rm_closed(rm_closedSEXP);
     Rcpp::traits::input_parameter< double >::type rtrough_max(rtrough_maxSEXP);
     Rcpp::traits::input_parameter< double >::type r_min(r_minSEXP);
-    check_season(d, rm_closed, rtrough_max, r_min);
+    rcpp_season_filter(d, rm_closed, rtrough_max, r_min);
     return R_NilValue;
 END_RCPP
 }
@@ -197,14 +202,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_wTSM
-NumericVector rcpp_wTSM(NumericVector y, NumericVector yfit, NumericVector w, int iter, int nptperyear, double wfact);
+NumericVector rcpp_wTSM(const NumericVector y, const NumericVector yfit, const NumericVector w, int iter, int nptperyear, double wfact);
 RcppExport SEXP _phenofit_rcpp_wTSM(SEXP ySEXP, SEXP yfitSEXP, SEXP wSEXP, SEXP iterSEXP, SEXP nptperyearSEXP, SEXP wfactSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type yfit(yfitSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type yfit(yfitSEXP);
+    Rcpp::traits::input_parameter< const NumericVector >::type w(wSEXP);
     Rcpp::traits::input_parameter< int >::type iter(iterSEXP);
     Rcpp::traits::input_parameter< int >::type nptperyear(nptperyearSEXP);
     Rcpp::traits::input_parameter< double >::type wfact(wfactSEXP);

@@ -1,7 +1,7 @@
 library(phenofit)
 data("MOD13A1")
 
-df <- tidy_MOD13.gee(MOD13A1$dt)
+df <- tidy_MOD13(MOD13A1$dt)
 st <- MOD13A1$st
 
 date_start <- as.Date('2010-01-01')
@@ -21,24 +21,25 @@ wFUN = wTSM
 
 ## 1. check_input
 # add one year in head and tail
-dnew     <- add_HeadTail(d, south = south, nptperyear = nptperyear)
-INPUT    <- check_input(dnew$t, dnew$y, dnew$w, QC_flag = dnew$QC_flag,
+# dnew     <- add_HeadTail(d, south = south, nptperyear = nptperyear)
+INPUT <- check_input(dnew$t, dnew$y, dnew$w, QC_flag = dnew$QC_flag,
      nptperyear = nptperyear, south = south,
      maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 
 ## 2. Rough fitting and growing season dividing
 # Rough fitting and growing season dividing
 brks2 <- season_mov(INPUT,
-    rFUN = wWHIT, wFUN = wFUN,
-    plotdat = d, IsPlot = IsPlot, print = FALSE, IsPlot.OnlyBad = FALSE)
+    options = list(rFUN = smooth_wWHIT, wFUN = wFUN))
+    # plotdat = d, IsPlot = IsPlot)
 
 ## 3. Fine fitting and growing season dividing
 fits <- curvefits(
     INPUT, brks2,
-    methods = c("AG", "Beck", "Elmore", "Zhang"), #,"klos", "Gu"
-    wFUN = wFUN,
-    nextend = 2, maxExtendMonth = 2, minExtendMonth = 1, minPercValid = 0.2,
-    print = TRUE, verbose = FALSE)
+    options = list(
+        methods = c("AG", "Beck", "Elmore", "Zhang"), #,"klos", "Gu"
+        wFUN = wFUN,
+        nextend = 2, maxExtendMonth = 2, minExtendMonth = 1, minPercValid = 0.2
+    ))
 
 ## 4. Phenological metric extraction
 l_param   <- get_param(fits)
@@ -48,7 +49,7 @@ l_pheno   <- get_pheno(fits, "AG", IsPlot=TRUE)
 
 # cairo_pdf('phenofit_MOD13A1.pdf', 12, 6)
 cairo_pdf('phenofit_MOD13A1.pdf', 8, 4.5)
-g <- plot_phenofit(d_fitting, brks2);
+g <- plot_curvefits(d_fitting, brks2);
 grid::grid.draw(g)
 dev.off()
 
@@ -101,6 +102,3 @@ if (is_comp) {
     grid::grid.draw(g)
     dev.off()
 }
-
-# p + geom_point(data = d_obs)
-    # geom_line (data = seasons$whit, aes_string(t, ziter2), color = "black", size = 0.8) + # show in front

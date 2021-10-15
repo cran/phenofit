@@ -4,23 +4,21 @@
 #' @docType package
 #' @keywords Vegetation phenology package
 #' @description Vegetation phenology package
-#' @import magrittr numDeriv plyr
-#' @import tibble ggplot2 
-#' @import foreach iterators
+#' 
+#' @import magrittr numDeriv
+#' @import ggplot2 
+#' @importFrom dplyr first last nth mutate group_by group_map group_modify select
+#' ungroup across starts_with as_tibble
 #' @importFrom gridExtra arrangeGrob
-#' @importFrom data.table data.table as.data.table := is.data.table fwrite fread
+#' @importFrom data.table data.table as.data.table := is.data.table fwrite fread 
+#' dcast
 #' @importFrom zoo na.approx index zoo
-#' @importFrom dplyr bind_cols bind_rows group_by first last nth
-#' @importFrom purrr map map_df map_dbl is_empty
-#' @importFrom tidyr gather spread
+#' @importFrom purrr map map_df
 #' @importFrom lubridate ymd yday year month day dyears is.Date
-#' @importFrom stringr str_extract
 #' @importFrom utils object.size
 #' @importFrom grDevices dev.off cairo_pdf colorRampPalette
-#' @importFrom jsonlite read_json write_json
-#' @importFrom shiny getDefaultReactiveDomain showNotification
 #' @import stats graphics
-#' 
+#' @import zeallot
 #' @useDynLib phenofit, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @keywords internal
@@ -33,15 +31,23 @@
 NULL
 
 .onLoad <- function (libname, pkgname){
+    opt_season <- c("rFUN", "wFUN", "iters", "wmin", "lambda", ".lambda_vcurve", 
+        "frame", "nf", "minpeakdistance", "ypeak_min", "r_max", "r_min", "rtrough_max", 
+        "MaxPeaksPerYear", "MaxTroughsPerYear", "calendarYear", "adj.param", 
+        "rm.closed", "is.continuous", ".check_season", "maxExtendMonth", 
+        "nextend", "len_min", "len_max", "verbose")
+    
     if(getRversion() >= "2.15.1") {
         utils::globalVariables(
-            c(".SD", ".N", 
+            c(".", ".SD", ".N", "..vars", 
               "left", "len", "right", "y_peak",
-              "meth", "doy", "origin", # tidyFitPheno
-              "DayOfYear", "SummaryQA", "site", "EVI", "w", "QC_flag", # tidy_MOD13.gee
-              "beg", "end",  # plot_phenofit
+              "meth", "doy", "origin", # tidy_pheno
+              "DayOfYear", "SummaryQA", "site", "EVI", "w", "QC_flag", # tidy_MOD13
+              "beg", "end",  # plot_curvefits
               "val", "type", "flag", "peak", # season, 
-              "i", "qc", "y", "sitename" # phenofit_TS.avhrr
+              "i", "qc", "y", "sitename",  # phenofit_TS.avhrr
+              opt_season, 
+              "years", "nyear", "d_fit", "info_peak"
             )
         )
     }

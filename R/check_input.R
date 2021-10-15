@@ -17,7 +17,7 @@
 #' @param QC_flag Factor (optional) returned by `qcFUN`, levels should be
 #' in the range of `c("snow", "cloud", "shadow", "aerosol", "marginal",
 #' "good")`, others will be categoried into `others`. `QC_flag` is
-#' used for visualization in [get_pheno()] and [plot_phenofit()].
+#' used for visualization in [get_pheno()] and [plot_curvefits()].
 #' @param nptperyear Integer, number of images per year.
 #' @param south Boolean. In south hemisphere, growing year is 1 July to the
 #' following year 31 June; In north hemisphere, growing year is 1 Jan to 31 Dec.
@@ -44,8 +44,8 @@
 #' is inappropriate for middle growing season points. Interpolating all values
 #' by na.approx, it is unsuitable for large number continous missing segments,
 #' e.g. in the start or end of growing season.
-#' @param alpha Double value in `[0,1]`, quantile prob of ylu_min.
-#' @param alpha_high Double value in `[0,1]`, quantile prob of `ylu_max`. If not 
+#' @param alpha Double, in `[0,1]`, quantile prob of ylu_min.
+#' @param alpha_high Double, `[0,1]`, quantile prob of `ylu_max`. If not
 #' specified, `alpha_high=alpha`.
 #' @param date_start,date_end starting and ending date of the original vegetation
 #' time-sereis (before `add_HeadTail`)
@@ -78,7 +78,7 @@ check_input <- function(t, y, w, QC_flag,
     wmin = 0.2,
     wsnow = 0.8,
     ymin, missval,
-    maxgap, alpha = 0.02, alpha_high = NULL, 
+    maxgap, alpha = 0.02, alpha_high = NULL,
     date_start = NULL, date_end = NULL,
     mask_spike = TRUE,
     ...)
@@ -107,8 +107,8 @@ check_input <- function(t, y, w, QC_flag,
     }
     y_good <- y[w >= w_critical] %>% rm_empty()
     # alpha/2, alpha_high set to 0.05 for remote sensing (20200322)
-    ylu    <- c(pmax( quantile(y_good, alpha_high/2), 0), 
-               quantile(y_good, 1 - alpha/2))
+    ylu    <- c(pmax( quantile(y_good, alpha/2), 0),
+               quantile(y_good, 1 - alpha_high/2))
 
     if (!missing(ymin) && !is.na(ymin)){
         # constrain back ground value
@@ -151,18 +151,20 @@ check_input <- function(t, y, w, QC_flag,
         ymov <- cbind(y[c(1, 1:(n - 2), n-1)], y[c(2, 3:n, n)]) %>% rowMeans(na.rm = TRUE)
         # ymov2 <- movmean(y, 1)
         halfwin <- ceiling(nptperyear/36) # about 10-days
+
         ymov2   <- movmean(y, halfwin = halfwin)
         # which(abs(y - ymean) > std) & w <= w_critical
         I_spike <- which(abs(y - ymov) > 2*std | abs(y - ymov2) > 2*std) # 95.44% interval, `(1- 2*pnorm(-2))*100`
 
-        y[I_spike]  <- NA # missval
-        y0[I_spike] <- missval # for debug
+        # print(I_spike)
+        y[I_spike] <- NA # missval
+        # y0 kept as original value, update 20200810
+        # y0[I_spike] <- missval # for debug
     }
     ## 3. gap-fill NA values
     w[is.na(w) | is.na(y)] <- wmin
     w[w <= wmin] <- wmin
     # left missing values were interpolated by `na.approx`
-    # browser()
     y <- na.approx(y, maxgap = maxgap, na.rm = FALSE)
     # If still have na values after na.approx, just replace it with `missval`.
     y[is.na(y)] <- missval
@@ -174,26 +176,6 @@ check_input <- function(t, y, w, QC_flag,
         nptperyear = nptperyear, south = south,
         date_start = date_start, date_end = date_end)
 }
-# write_fig(expression({
-#     Ind = 1:length(y)
-#     # Ind = t <= "2004-01-01"
-#     lwd = 0.8
-#     print(I_spike)
-#     plot(t[Ind], y[Ind], type = "b", lwd = lwd)
-#     grid()
-#     lines(t, ymov, type = "b", col = "blue", lwd = lwd)
-#     points(t[I_spike], y[I_spike], col = "red")
-#     # points(t[I_spike2], y[I_spike2], col = "red")
-#     y[I_spike]  <- NA # missval
-#     y0[I_spike] <- missval # for debug
-#     plot(t[Ind], y[Ind], type = "l", lwd = lwd, col = "red")
-# }), "check_input.pdf", 10, 5)
-# write_fig(expression({
-    # plot(y0, type = "l")
-    # points(I_spike, y0[I_spike])
-    # lines(ymov, col = "blue")
-    # lines(ymov2, col = "green")
-# }), "b.pdf")
 
 #' check_ylu
 #'
@@ -239,3 +221,24 @@ check_ylu <- function(yfit, ylu){
 #     }
 #     return(y)
 # }
+
+# write_fig(expression({
+#     Ind = 1:length(y)
+#     # Ind = t <= "2004-01-01"
+#     lwd = 0.8
+#     print(I_spike)
+#     plot(t[Ind], y[Ind], type = "b", lwd = lwd)
+#     grid()
+#     lines(t, ymov, type = "b", col = "blue", lwd = lwd)
+#     points(t[I_spike], y[I_spike], col = "red")
+#     # points(t[I_spike2], y[I_spike2], col = "red")
+#     y[I_spike]  <- NA # missval
+#     y0[I_spike] <- missval # for debug
+#     plot(t[Ind], y[Ind], type = "l", lwd = lwd, col = "red")
+# }), "check_input.pdf", 10, 5)
+# write_fig(expression({
+    # plot(y0, type = "l")
+    # points(I_spike, y0[I_spike])
+    # lines(ymov, col = "blue")
+    # lines(ymov2, col = "green")
+# }), "b.pdf")

@@ -4,6 +4,7 @@
 #' curve fitting functions.
 #'
 #' @inheritParams smooth_wHANTS
+#' @inheritParams stats::nlminb
 #' @param prior A vector of initial values for the parameters for which optimal
 #' values are to be found. `prior` is suggested giving a column name.
 #' @param sFUN The name of fine curve fitting functions, can be one of `
@@ -18,15 +19,15 @@
 #' @param method The name of optimization method to solve fine fitting, one of
 #' `'BFGS','CG','Nelder-Mead', 'L-BFGS-B', 'nlm', 'nlminb', 'ucminf'` and
 #' `'spg','Rcgmin','Rvmmin', 'newuoa','bobyqa','nmkb','hjkb'`.
-#'
+#' @param constrain boolean, whether to use parameter constrain
 #' @param verbose Whether to display intermediate variables?
 #' @param ... other parameters passed to [I_optim()] or [I_optimx()].
 #'
 #' @return fFIT object, see [fFIT()] for details.
 #'
-#' @seealso [FitDL()]
+#' @seealso [FitDL()], [stats::nlminb()]
 #'
-#' @example man/examples/ex-optim_pheno.R
+#' @example R/examples/ex-optim_pheno.R
 #'
 #' @import optimx
 #' @export
@@ -35,9 +36,15 @@ optim_pheno <- function(
     y, t, tout, method,
     w, nptperyear, ylu,
     iters = 2, wFUN = wTSM,
+    lower = -Inf, upper = Inf,
+    constrain = TRUE,
     verbose = FALSE, ...)
 {
-    sFUN = gsub("\\.", "_", sFUN )
+    if (!constrain) {
+        lower = -Inf; upper = Inf
+    }
+
+    # sFUN = gsub("\\.", "_", sFUN )
     FUN <- get(sFUN, mode = "function" )
 
     ntime = length(t)
@@ -89,7 +96,8 @@ optim_pheno <- function(
         # do.call(I_optimFUN, params)
         # save(list = ls(), file = "debug.rda")
         # pass verbose for optimx optimization methods selection
-        opt.df  <- I_optimFUN(prior, FUN, y, t, method = method, w = w, verbose = verbose, ...)
+        opt.df  <- I_optimFUN(prior, FUN, y, t, method = method, w = w, verbose = verbose,
+            lower = lower, upper = upper, ...)
         # print(opt.df)
         if (verbose){
             fprintf('Initial parameters:\n')
@@ -117,10 +125,11 @@ optim_pheno <- function(
                 warning("Not convergent!")
             }else{
                 par   <- opt[1, 1:npar, drop = FALSE]
-                # put opt par into prior for the next iteration
+                # put opt par into prior for the next iteration, 
+                # This step not consider in Julia, the induced difference is tiny.
                 prior <- rbind(prior[1:(nrow(prior)-1), ], par, deparse.level = 0) %>%
                     unique.matrix()
-                FUN(par, tout, ypred)
+                ypred = FUN(par, tout)
                 # too much missing values
                 # if (sum(w == 0)/length(w) > 0.5) ypred <- ypred*NA
                 # to adapt wTS, set iter = i-1; #20180910
@@ -131,6 +140,7 @@ optim_pheno <- function(
                         message(sprintf('[%s]: %s', sFUN, e$message))
                         return(w) #return original w
                     })
+                
                 ypred %<>% check_ylu(ylu) #values out of ylu are set as NA
             }
         }
@@ -151,14 +161,3 @@ optim_pheno <- function(
 #   satisfied, so using self unified optimization function (with prefixion of
 #   'p_', opt_FUN means phenology optimization function) to replace it through
 #   `optim_p` function. The unified procedure was inspired by `optimx` package.
-
-# 1. nlfr package
-# start <- set_names(prior[1, ], attr(FUN, "par"))
-# # lower = lower, upper = upper
-# f_nlf <- nlfb(start, resfn = function(par, t, y, fun, ...){
-#     fun(par, t) - y
-# }, trace = FALSE, y = y, t=t, w = w, fun = FUN, ...)
-# yfit  <- FUN(f_nlf$coefficients, t)
-# plot(t, y, type = "b")
-# lines(t, yfit)
-# print(f_nlf)

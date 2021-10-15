@@ -8,10 +8,12 @@ plot_season(
   INPUT,
   brks,
   plotdat,
-  ylu,
   IsPlot.OnlyBad = FALSE,
   show.legend = TRUE,
-  title = NULL
+  ylab = "VI",
+  title = NULL,
+  show.shade = TRUE,
+  margin = 0.35
 )
 }
 \arguments{
@@ -25,14 +27,17 @@ Only if \code{IsPlot=TRUE}, \code{\link[=plot_input]{plot_input()}} will be used
 Known that y and w in \code{INPUT} have been changed, we suggest using the
 original data.table.}
 
-\item{ylu}{\verb{[low, high]} of time-series y (curve fitting values are constrained
-in the range of \code{ylu}.}
-
 \item{IsPlot.OnlyBad}{If true, only plot partial figures whose NSE < 0.3.}
 
 \item{show.legend}{Whether to show legend?}
 
+\item{ylab}{y axis title}
+
 \item{title}{The main title (on top)}
+
+\item{show.shade}{Boolean, period inside growing cycle colored as shade?}
+
+\item{margin}{\verb{ylim = c(ymin, ymax + margin * A); A = ymax - ymin}.}
 }
 \description{
 Plot growing season divding result.

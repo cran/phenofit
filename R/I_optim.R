@@ -26,7 +26,7 @@ methods <- c(
 #' [stats::nlm()], [optimx::optimx()],
 #' [ucminf::ucminf()]
 #'
-#' @example man/examples/ex-I_optim.R
+#' @example R/examples/ex-I_optim.R
 #'
 #' @keywords internal
 #' @export
@@ -94,10 +94,12 @@ I_optimx <- function(prior, FUN, y, t, method, verbose = FALSE, ...){
     if (is.vector(prior)) prior <- t(prior)
 
     # add method column
-    opt.lst <- alply(prior, 1, optimx, method = method,
-        fn = f_goal, fun = FUN, y = y, t = t, pred = pred, ...,
-        control = list(maxit = 1000, all.methods = verbose, dowarn = FALSE)
-    )
+    opt.lst <- map(1:nrow(prior), function(i) {
+        optimx(prior[i, ],
+            method = method, fn = f_goal, fun = FUN, y = y, t = t, pred = pred, ...,
+            control = list(maxit = 1000, all.methods = verbose, dowarn = FALSE)
+        )
+    })
     opt.df <- map(opt.lst, ~cbind(., method = rownames(.))) %>%
         do.call(rbind, .) %>% set_rownames(NULL)
     opt.df$kkt1 <- NULL
@@ -109,14 +111,6 @@ I_optimx <- function(prior, FUN, y, t, method, verbose = FALSE, ...){
         print(opt.df)
 
         df <- opt.df[, c("method", "value", "xtimes", "convcode")]#
-        # df %<>% reshape2::melt(id.vars = "method", variable.name = "index")
-        # df$method %<>% as.factor()
-        # ggplot(df, aes(y = method, y = value*1000, fill = method)) +
-        #     geom_point() +
-        #     scale_y_log10() +
-        #     geom_boxplot(outlier.size=2) +
-        #     facet_wrap(~index, ncol = 1, scales = "free_y") +
-        #     geom_jitter(width = 0.15, size = 1.7, alpha = 1)
         avg <- aggregate(.~method, df, mean)
         avg <- avg[avg$convcode < 0.5, ]
         avg %<>% {.[with(., order(value, xtimes)), ]}

@@ -1,3 +1,27 @@
+#' @name fFIT
+#' @title S3 class of fine curve fitting object.
+#'
+#' @description
+#' `fFIT` is returned by [optim_pheno()].
+#'
+#' @format
+#' * `tout`: Corresponding doy of prediction
+#' * `zs`: curve fitting values of every iteration
+#' * `ws`: weight of every iteration
+#' * `par`: Optimized parameter of fine curve fitting method
+#' * `fun`: The name of fine curve fitting function.
+#'
+#' @keywords internal
+NULL
+
+#' @export
+print.fFIT <- function(x, ...) {
+    FUN <- get(x$fun, mode = "function")
+    cat(sprintf(" formula:\t%s\n", attr(FUN, "formula")))
+    cat("pars:\n")
+    print(x$par)
+}
+
 #' @name fFITs
 #' @title S3 class of multiple fine curve fittings object.
 #'
@@ -19,7 +43,6 @@
 #' @keywords internal
 NULL
 
-
 #' plot function for phenofit class
 #'
 #' plot curve fitting VI, gradient (first order difference D1), hessian (D2),
@@ -34,13 +57,11 @@ NULL
 #' @keywords internal
 #' @export
 plot.fFITs <- function(x, method, ...){
-
     if (missing(method)) {
         methods <- names(x$fFIT)
     } else {
         methods <- method
     }
-
     nmeth   <- length(methods)
 
     t    <- x$tout
@@ -51,7 +72,7 @@ plot.fFITs <- function(x, method, ...){
 
         pred   <- last(fFIT$zs)
 
-        pop    <- t[which.max(pred)]
+        pos    <- t[which.max(pred)]
         derivs <- curvature(fFIT)
 
         # plot for every method
@@ -63,7 +84,7 @@ plot.fFITs <- function(x, method, ...){
             type= "b", pch = 20, cex = 1.3, col = "grey",
             main = "curve fitting VI", xlab = "Index", ylab = "VI")
         lines(t, pred); grid()
-        abline(v = pop, col ="green")
+        abline(v = pos, col ="green")
 
         maxd_der1 <- t[which.max(derivs$der1)]
         mind_der1 <- t[which.min(derivs$der1)]
@@ -71,14 +92,14 @@ plot.fFITs <- function(x, method, ...){
         plot(t, derivs$der1, main = "D1"); grid()
         abline(v = maxd_der1, col ="blue")
         abline(v = mind_der1, col ="red")
-        abline(v = pop, col ="green")
+        abline(v = pos, col ="green")
 
         plot(t, derivs$der2, main = "D2"); grid()
         plot(t, derivs$k, main = "k")    ; grid()
         abline(v = maxd_der1, col ="blue")
         abline(v = mind_der1, col ="red")
-        abline(v = pop, col ="green")
-        abline(v = pop + 20, col ="green", lty = 2)
+        abline(v = pos, col ="green")
+        abline(v = pos + 20, col ="green", lty = 2)
         # plot(diff(der1_diff), main = "diff2")
 
         # k <- derivs$k
