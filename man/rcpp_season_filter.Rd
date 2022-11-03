@@ -3,14 +3,14 @@
 \name{rcpp_season_filter}
 \alias{rcpp_season_filter}
 \alias{check_season_dt}
-\alias{cheak_season_list}
+\alias{check_season_list}
 \title{season_filter}
 \usage{
 rcpp_season_filter(d, rm_closed = TRUE, rtrough_max = 0.7, r_min = 0.02)
 
 check_season_dt(dt)
 
-cheak_season_list(lst_dt)
+check_season_list(lst_dt)
 }
 \arguments{
 \item{d}{Data.frame of growing season dividing info}
@@ -21,7 +21,7 @@ cheak_season_list(lst_dt)
 trough value. There are two threshold (left and right). The minimum threshold
 should be greater than r_min.}
 
-\item{dt}{data.table of growing season dividing info}
+\item{dt}{data.table of growing season division info}
 
 \item{lst_dt}{list of \code{dt}. Every year is corresponding to a \code{dt}.}
 }

@@ -2,38 +2,55 @@
 % Please edit documentation in R/get_pheno.R
 \name{get_pheno}
 \alias{get_pheno}
+\alias{get_pheno.rfit}
+\alias{get_pheno.list}
 \alias{get_pheno.fFITs}
 \title{get_pheno}
 \usage{
-get_pheno(
-  fits,
+get_pheno(x, ...)
+
+\method{get_pheno}{rfit}(x, TRS = c(0.2, 0.5), asymmetric = TRUE, ...)
+
+\method{get_pheno}{list}(
+  x,
   method,
   TRS = c(0.2, 0.5, 0.6),
-  analytical = TRUE,
+  analytical = FALSE,
   smoothed.spline = FALSE,
   IsPlot = FALSE,
-  show_title = TRUE,
+  show.title = TRUE,
   ...
 )
 
-get_pheno.fFITs(
-  fFITs,
+\method{get_pheno}{fFITs}(
+  x,
   method,
   TRS = c(0.2, 0.5),
-  analytical = TRUE,
+  analytical = FALSE,
   smoothed.spline = FALSE,
   IsPlot = FALSE,
-  title_left = "",
-  showName_pheno = TRUE
+  title.left = "",
+  show.PhenoName = TRUE,
+  ...
 )
 }
 \arguments{
-\item{fits}{A list of \code{\link[=fFITs]{fFITs()}} object, for a single curve fitting
-method.}
+\item{x}{One of:
+\itemize{
+\item \code{rfit} (rought fitting object), returned by \code{\link[=brks2rfit]{brks2rfit()}}.
+\item \code{fFITs} (fine fitting object), return by multiple curve fitting methods by \code{\link[=curvefit]{curvefit()}} for
+a growing season.
+\item list of \code{\link[=fFITs]{fFITs()}} object, for multiple growing seasons.
+}}
 
-\item{method}{Which fine curve fitting method to be extracted?}
+\item{...}{ignored.}
 
 \item{TRS}{Threshold for \code{PhenoTrs}.}
+
+\item{asymmetric}{If true, background value in spring season and autumn season
+is regarded as different.}
+
+\item{method}{Which fine curve fitting method to be extracted?}
 
 \item{analytical}{If true, \code{numDeriv} package \code{grad} and \code{hess}
 will be used; if false, \code{D1} and \code{D2} will be used.}
@@ -42,16 +59,14 @@ will be used; if false, \code{D1} and \code{D2} will be used.}
 
 \item{IsPlot}{Boolean. Whether to plot figure?}
 
-\item{show_title}{Whether to show the name of fine curve fitting method
+\item{show.title}{Whether to show the name of fine curve fitting method
 in top title?}
 
-\item{...}{ignored.}
+\item{title.left}{String of growing season flag.}
 
-\item{fFITs}{\code{fFITs} object returned by \code{\link[=curvefit]{curvefit()}}.}
+\item{show.PhenoName}{Whether to show phenological methods names in the top panel?}
 
-\item{title_left}{String of growing season flag.}
-
-\item{showName_pheno}{Whether to show phenological methods names in the top panel?}
+\item{fFITs}{\code{fFITs} object returned by \code{\link[=curvefits]{curvefits()}}}
 }
 \value{
 List of every year phenology metrics
@@ -59,21 +74,17 @@ List of every year phenology metrics
 \description{
 Get yearly vegetation phenological metrics of a curve fitting method
 }
-\note{
-Please note that only a single fine curve fitting method allowed here!
-}
 \examples{
 library(phenofit)
 # simulate vegetation time-series
-fFUN = doubleLog.Beck
+FUN = doubleLog.Beck
 par  = c( mn  = 0.1, mx  = 0.7, sos = 50, rsp = 0.1, eos = 250, rau = 0.1)
 t    <- seq(1, 365, 8)
 tout <- seq(1, 365, 1)
-y <- fFUN(par, t)
+y <- FUN(par, t)
 methods <- c("AG", "Beck", "Elmore", "Gu", "Zhang") # "Klos" too slow
-fFITs <- curvefit(y, t, tout, methods)
-# multiple years
-fits  <- list(`2001` = fFITs, `2002` = fFITs)
+fit <- curvefit(y, t, tout, methods) # `fFITs` (fine-fitting) object 
+fits <- list(`2001` = fit, `2002` = fit) # multiple years
 
 l_param   <- get_param(fits)
 d_GOF     <- get_GOF(fits)

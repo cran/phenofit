@@ -1,7 +1,7 @@
 Package: phenofit
 Type: Package
 Title: Extract Remote Sensing Vegetation Phenology
-Version: 0.3.2
+Version: 0.3.6
 Authors@R: c(
     person("Dongdong", "Kong", role = c("aut", "cre"), email = "kongdd.sysu@gmail.com"),
     person("Mingzhong", "Xiao", role = c("aut"), email = "xmingzh@mail2.sysu.edu.cn"),
@@ -32,18 +32,18 @@ Description:
 License: GPL-2 | file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 LinkingTo: Rcpp, RcppArmadillo
 Depends: R (>= 3.1)
-Imports: Rcpp, purrr, dplyr, magrittr, lubridate, data.table, zoo,
-        gridExtra, ggplot2, optimx, ucminf, numDeriv, JuliaCall,
-        methods, zeallot
+Imports: Rcpp, purrr, dplyr, stringr, magrittr, lubridate, data.table,
+        zoo, gridExtra, ggplot2, optimx, ucminf, numDeriv, methods,
+        zeallot
 Suggests: knitr, rmarkdown, reshape2, spam, testthat (>= 2.1.0)
 URL: https://github.com/eco-hydro/phenofit
 BugReports: https://github.com/eco-hydro/phenofit/issues
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2021-10-15 10:14:15 UTC; kongdd
+Packaged: 2022-11-03 06:29:52 UTC; hydro
 Author: Dongdong Kong [aut, cre],
   Mingzhong Xiao [aut],
   Yongqiang Zhang [aut],
@@ -51,4 +51,4 @@ Author: Dongdong Kong [aut, cre],
   Jianjian Cui [aut]
 Maintainer: Dongdong Kong <kongdd.sysu@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-10-15 10:50:02 UTC
+Date/Publication: 2022-11-03 08:26:39 UTC

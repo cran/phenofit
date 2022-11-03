@@ -2,22 +2,30 @@
 % Please edit documentation in R/smooth_wWHIT_lambda.R
 \name{lambda_vcurve}
 \alias{lambda_vcurve}
-\alias{lambda_vcurve_jl}
-\alias{lambda_cv_jl}
 \title{lambda_vcurve}
 \usage{
 lambda_vcurve(
   y,
   w,
-  d = 2,
-  lg_lambda_min = 0.1,
-  lg_lambda_max = 5,
-  IsPlot = FALSE
+  lg_lambdas = seq(0.1, 5, 0.1),
+  plot = FALSE,
+  verbose = FALSE,
+  ...
 )
+}
+\arguments{
+\item{y}{Numeric vector, vegetation index time-series}
 
-lambda_vcurve_jl(y, w, lg_lambda_min = 0.1, lg_lambda_max = 3)
+\item{w}{(optional) Numeric vector, weights of \code{y}. If not specified,
+weights of all \code{NA} values will be \code{wmin}, the others will be 1.0.}
 
-lambda_cv_jl(y, w, d = 2, lg_lambda_min = 0.1, lg_lambda_max = 3)
+\item{lg_lambdas}{numeric vector, log10(lambda) candidates. The optimal \code{lambda}
+will be optimized from \code{lg_lambda}.}
+
+\item{plot}{logical. If \code{TRUE}, the optimized \code{lambda} will be printed on the
+console.}
+
+\item{...}{ignored.}
 }
 \description{
 lambda_vcurve

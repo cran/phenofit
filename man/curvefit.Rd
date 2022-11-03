@@ -9,7 +9,10 @@ curvefit(
   t = index(y),
   tout = t,
   methods = c("AG", "Beck", "Elmore", "Gu", "Klos", "Zhang"),
-  ...
+  w = NULL,
+  ...,
+  type = 1L,
+  use.cpp = FALSE
 )
 }
 \arguments{
@@ -21,7 +24,19 @@ curvefit(
 
 \item{methods}{Fine curve fitting methods, can be one or more of \code{c('AG', 'Beck', 'Elmore', 'Gu', 'Klos', 'Zhang')}.}
 
+\item{w}{(optional) Numeric vector, weights of \code{y}. If not specified,
+weights of all \code{NA} values will be \code{wmin}, the others will be 1.0.}
+
 \item{...}{other parameters passed to curve fitting function.}
+
+\item{type}{integer, \code{1} or \code{-1}
+\itemize{
+\item \code{1}: trough-to-trough curve fitting
+\item \code{-1}: peak-to-peak curve fitting
+}}
+
+\item{use.cpp}{(unstable, not used) boolean, whether to use c++ defined fine
+fitting function? If \code{FALSE}, R version will be used.}
 }
 \value{
 fFITs S3 object, see \code{\link[=fFITs]{fFITs()}} for details.
@@ -36,24 +51,15 @@ fine curve fitting methods.
 \examples{
 library(phenofit)
 # simulate vegetation time-series
-fFUN = doubleLog.Beck
-par  = c(
-    mn  = 0.1,
-    mx  = 0.7,
-    sos = 50,
-    rsp = 0.1,
-    eos = 250,
-    rau = 0.1)
+FUN = doubleLog.Beck
+par = c(mn  = 0.1, mx  = 0.7, sos = 50, rsp = 0.1, eos = 250, rau = 0.1)
 t    <- seq(1, 365, 8)
 tout <- seq(1, 365, 1)
-y <- fFUN(par, t)
+y <- FUN(par, t)
 
 methods <- c("AG", "Beck", "Elmore", "Gu", "Zhang") # "Klos" too slow
-fFITs <- curvefit(y, t, tout, methods)
+fit <- curvefit(y, t, tout = tout, methods)
 }
 \seealso{
-\code{\link[=fFITs]{fFITs()}},
-\code{\link[=FitDL.AG]{FitDL.AG()}}, \code{\link[=FitDL.Beck]{FitDL.Beck()}},
-\code{\link[=FitDL.Elmore]{FitDL.Elmore()}}, \code{\link[=FitDL.Gu]{FitDL.Gu()}},
-\code{\link[=FitDL.Klos]{FitDL.Klos()}}, \code{\link[=FitDL.Zhang]{FitDL.Zhang()}}
+\code{\link[=fFITs]{fFITs()}}
 }

@@ -11,39 +11,9 @@ curvefits(INPUT, brks, options = list(), ...)
 and 'ylu', returned by \code{check_input}.}
 
 \item{brks}{A list object with the elements of 'fit' and 'dt', returned by
-\code{season} or \code{season_mov}, which contains the growing season
-dividing information.}
+\code{season} or \code{season_mov}, which contains the growing season division information.}
 
-\item{options}{\itemize{
-\item \code{methods} (default \verb{c('AG', 'Beck', 'Elmore', 'Zhang')``): Fine curve fitting methods, can be one or more of }c('AG', 'Beck', 'Elmore', 'Zhang', 'Gu', 'Klos')`. Note that 'Gu' and 'Klos'
-are very slow.
-\item \code{wFUN} (default \code{wTSM}): Character or function, weights updating function
-of fine fitting function.
-\item \code{iters} (default 2): max iterations of fine fitting.
-\item \code{wmin} (default 0.1): min weights in the weights updating procedure.
-\item \code{use.rough} (default FALSE): Whether to use rough fitting smoothed time-series as input?
-If \code{false}, smoothed VI by rough fitting will be used for Phenological metrics
-extraction; If \code{true}, original input \code{y} will be used (rough fitting is used
-to divide growing seasons and update weights.
-\item \code{use.y0} (default TRUE): boolean. whether to use original \code{y0} as the input of \code{plot_input},
-note that not for curve fitting. \code{y0} is the original value before the process
-of \code{check_input}.
-\item \code{nextend} (default 2): Extend curve fitting window, until \code{nextend} good or
-marginal element are found in previous and subsequent growing season.
-\item \code{maxExtendMonth} (default 1): Search good or marginal good values in previous and
-subsequent \code{maxExtendMonth} period.
-\item \code{minExtendMonth} (default 2): Extending perid defined by \code{nextend} and \code{maxExtendMonth},
-should be no shorter than \code{minExtendMonth}.
-When all points of the input time-series are good value, then the extending
-period will be too short. In that situation, we can't make sure the connection
-between different growing seasons is smoothing.
-\item \code{minPercValid}: (default 0, not use). If the percentage of good
-and marginal quality points is less than \code{minPercValid}, curve fiting result
-is set to \code{NA}.
-\item \code{minT}: (not used currently). If \code{Tn} not provided in \code{INPUT}, \code{minT} will not be used.
-\code{minT} use night temperature Tn to define backgroud value (days with \code{Tn < minT}
-treated as ungrowing season).
-}}
+\item{options}{see section: options for fitting for details.}
 
 \item{...}{other parameters to \code{\link[=curvefit]{curvefit()}}}
 }
@@ -53,6 +23,40 @@ List of phenofit fitting object.
 \description{
 Fine Curve fitting for INPUT time-series.
 }
+\section{options for fitting}{
+
+\itemize{
+\item \code{methods} (default \verb{c('AG', 'Beck', 'Elmore', 'Zhang')``): Fine curve fitting methods, can be one or more of }c('AG', 'Beck', 'Elmore', 'Zhang',
+'Gu', 'Klos')`. Note that 'Gu' and 'Klos' are very slow.
+\item \code{iters} (default 2): max iterations of fine fitting.
+\item \code{wFUN} (default \code{wTSM}): Character or function, weights updating function
+of fine fitting function.
+\item \code{wmin} (default 0.1): min weights in the weights updating procedure.
+\item \code{use.rough} (default FALSE): Whether to use rough fitting smoothed
+time-series as input? If \code{false}, smoothed VI by rough fitting will be used
+for Phenological metrics extraction; If \code{true}, original input \code{y} will be
+used (rough fitting is used to divide growing seasons and update weights.
+\item \code{use.y0} (default TRUE): boolean. whether to use original \code{y0} as the input
+of \code{plot_input}, note that not for curve fitting. \code{y0} is the original
+value before the process of \code{check_input}.
+\item \code{nextend} (default 2): Extend curve fitting window, until \code{nextend} good or
+marginal points are found in the previous and subsequent growing season.
+\item \code{maxExtendMonth} (default 1): Search good or marginal good values in
+previous and subsequent \code{maxExtendMonth} period.
+\item \code{minExtendMonth} (default 0.5): Extend period defined by \code{nextend} and
+\code{maxExtendMonth}, should be no shorter than \code{minExtendMonth}. When all
+points of the input time-series are good value, then the extending period
+will be too short. In that situation, we can't make sure the connection
+between different growing seasons is smoothing.
+\item \code{minPercValid}: (default 0, not use). If the percentage of good- and
+marginal- quality points is less than \code{minPercValid}, curve fiting result is
+set to \code{NA}.
+\item \code{minT}: (not use). If \code{Tn} not provided in \code{INPUT}, \code{minT} will
+not be used. \code{minT} use night temperature Tn to define backgroud value
+(days with \code{Tn < minT} treated as ungrowing season).
+}
+}
+
 \examples{
 data("CA_NS6")
 d = CA_NS6
@@ -67,14 +71,14 @@ INPUT <- check_input(d$t, d$y, d$w, QC_flag = d$QC_flag,
 wFUN <- "wTSM"
 brks2 <- season_mov(INPUT,
     options = list(
-        rFUN = smooth_wWHIT, wFUN = wFUN,
+        rFUN = "smooth_wWHIT", wFUN = wFUN,
         r_min = 0.05, ypeak_min = 0.05,
         lambda = 10,
         verbose = FALSE
     ))
 # plot_season(INPUT, brks2, d)
 # Fine fitting
-fit <- curvefits(
+fits <- curvefits(
     INPUT, brks2,
     options = list(
         methods = c("AG", "Beck", "Elmore", "Zhang"), #,"klos", "Gu"
@@ -83,10 +87,10 @@ fit <- curvefits(
     )
 )
 
-r_param = get_param(fit)
-r_pheno = get_pheno(fit)
-r_gof = get_GOF(fit)
-d_fit = get_fitting(fit)
+r_param = get_param(fits)
+r_pheno = get_pheno(fits)
+r_gof = get_GOF(fits)
+d_fit = get_fitting(fits)
 
 g <- plot_curvefits(d_fit, brks2)
 grid::grid.newpage(); grid::grid.draw(g)

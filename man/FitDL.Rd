@@ -11,19 +11,19 @@
 \alias{FitDL.Klos}
 \title{Fine fitting}
 \usage{
-FitDL.Zhang(y, t = index(y), tout = t, method = "nlm", w, ...)
+FitDL.Zhang(y, t = index(y), tout = t, method = "nlm", w, type = 1L, ...)
 
-FitDL.AG(y, t = index(y), tout = t, method = "nlminb", w, ...)
+FitDL.AG(y, t = index(y), tout = t, method = "nlminb", w, type = 1L, ...)
 
-FitDL.AG2(y, t = index(y), tout = t, method = "nlminb", w, ...)
+FitDL.AG2(y, t = index(y), tout = t, method = "nlminb", w, type = 1L, ...)
 
-FitDL.Beck(y, t = index(y), tout = t, method = "nlminb", w, ...)
+FitDL.Beck(y, t = index(y), tout = t, method = "nlminb", w, type = 1L, ...)
 
-FitDL.Elmore(y, t = index(y), tout = t, method = "nlminb", w, ...)
+FitDL.Elmore(y, t = index(y), tout = t, method = "nlminb", w, type = 1L, ...)
 
-FitDL.Gu(y, t = index(y), tout = t, method = "nlminb", w, ...)
+FitDL.Gu(y, t = index(y), tout = t, method = "nlminb", w, type = 1L, ...)
 
-FitDL.Klos(y, t = index(y), tout = t, method = "BFGS", w, ...)
+FitDL.Klos(y, t = index(y), tout = t, method = "BFGS", w, type = 1L, ...)
 }
 \arguments{
 \item{y}{input vegetation index time-series.}
@@ -35,6 +35,12 @@ FitDL.Klos(y, t = index(y), tout = t, method = "BFGS", w, ...)
 \item{method}{method passed to \code{optimx} or \code{optim} function.}
 
 \item{w}{weights}
+
+\item{type}{integer, \code{1} or \code{-1}
+\itemize{
+\item \code{1}: trough-to-trough curve fitting
+\item \code{-1}: peak-to-peak curve fitting
+}}
 
 \item{...}{other paraters passed to \code{\link[=optim_pheno]{optim_pheno()}}.}
 }
@@ -52,20 +58,18 @@ Fine curve fitting function is used to fit vegetation
 time-series in every growing season.
 }
 \examples{
-library(phenofit)
 # simulate vegetation time-series
-fFUN = doubleLog.Beck
-par  = c( mn  = 0.1, mx  = 0.7, sos = 50, rsp = 0.1, eos = 250, rau = 0.1)
 t    <- seq(1, 365, 8)
+par  <- c(mn = 0.1, mx = 0.7, sos = 50, rsp = 0.1, eos = 250, rau = 0.1)
+y    <- doubleLog.Beck(par, t)
+data <- data.frame(t, y)
+# methods <- c("AG", "Beck", "Elmore", "Gu", "Zhang")
 tout <- seq(1, 365, 1)
-y <- fFUN(par, t)
-methods <- c("AG", "Beck", "Elmore", "Gu", "Zhang")
+r <- FitDL.Elmore(y, t, tout)
 
-r <- FitDL.AG(y, t, tout)
-plot(t, y)
-lines(tout, r$zs$iter2, col = "red")
-legend('topright', c('Original time-series', 'AG smoothed'), 
-    lty = c(0, 1), pch = c(16, NA), col = c("black", "red"))
+plot(r, data)
+get_GOF(r, data)
+get_param(r)
 }
 \references{
 \enumerate{

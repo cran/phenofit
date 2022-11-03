@@ -5,57 +5,54 @@
 #' @param INPUT A list object with the elements of 't', 'y', 'w', 'Tn' (optional)
 #' and 'ylu', returned by `check_input`.
 #' @param brks A list object with the elements of 'fit' and 'dt', returned by
-#' `season` or `season_mov`, which contains the growing season
-#' dividing information.
+#' `season` or `season_mov`, which contains the growing season division information.
 #'
-#' @param options
-#' - `methods` (default `c('AG', 'Beck', 'Elmore', 'Zhang')``):
-#' Fine curve fitting methods, can be one or more of
-#' `c('AG', 'Beck', 'Elmore', 'Zhang', 'Gu', 'Klos')`. Note that 'Gu' and 'Klos'
-#' are very slow.
-#'
-#' - `wFUN` (default `wTSM`): Character or function, weights updating function
-#' of fine fitting function.
-#'
-#' - `iters` (default 2): max iterations of fine fitting.
-#'
-#' - `wmin` (default 0.1): min weights in the weights updating procedure.
-#'
-#' - `use.rough` (default FALSE): Whether to use rough fitting smoothed time-series as input?
-#' If `false`, smoothed VI by rough fitting will be used for Phenological metrics
-#' extraction; If `true`, original input `y` will be used (rough fitting is used
-#' to divide growing seasons and update weights.
-#'
-#' - `use.y0` (default TRUE): boolean. whether to use original `y0` as the input of `plot_input`,
-#' note that not for curve fitting. `y0` is the original value before the process
-#' of `check_input`.
-#'
-#' - `nextend` (default 2): Extend curve fitting window, until `nextend` good or
-#' marginal element are found in previous and subsequent growing season.
-#'
-#' - `maxExtendMonth` (default 1): Search good or marginal good values in previous and
-#' subsequent `maxExtendMonth` period.
-#'
-#' - `minExtendMonth` (default 2): Extending perid defined by `nextend` and `maxExtendMonth`,
-#' should be no shorter than `minExtendMonth`.
-#' When all points of the input time-series are good value, then the extending
-#' period will be too short. In that situation, we can't make sure the connection
-#' between different growing seasons is smoothing.
-#'
-#' - `minPercValid`: (default 0, not use). If the percentage of good
-#' and marginal quality points is less than `minPercValid`, curve fiting result
-#' is set to `NA`.
-#'
-#' - `minT`: (not used currently). If `Tn` not provided in `INPUT`, `minT` will not be used.
-#' `minT` use night temperature Tn to define backgroud value (days with `Tn < minT`
-#' treated as ungrowing season).
-#'
-#' @param ...  other parameters to [curvefit()]
-#'
+#' @param options see section: options for fitting for details.
 #' @return List of phenofit fitting object.
 #' @seealso [FitDL()]
-#'
 #' @example inst/examples/ex-curvefits.R
+
+#' @section options for fitting:
+#' - `methods` (default `c('AG', 'Beck', 'Elmore', 'Zhang')``): Fine curve
+#'   fitting methods, can be one or more of `c('AG', 'Beck', 'Elmore', 'Zhang',
+#'   'Gu', 'Klos')`. Note that 'Gu' and 'Klos' are very slow.
+#' - `iters` (default 2): max iterations of fine fitting.
+#' 
+#' - `wFUN` (default `wTSM`): Character or function, weights updating function
+#'  of fine fitting function.
+#' 
+#' - `wmin` (default 0.1): min weights in the weights updating procedure.
+#'
+#' - `use.rough` (default FALSE): Whether to use rough fitting smoothed
+#'   time-series as input? If `false`, smoothed VI by rough fitting will be used
+#'   for Phenological metrics extraction; If `true`, original input `y` will be
+#'   used (rough fitting is used to divide growing seasons and update weights.
+#'
+#' - `use.y0` (default TRUE): boolean. whether to use original `y0` as the input
+#'   of `plot_input`, note that not for curve fitting. `y0` is the original
+#'   value before the process of `check_input`.
+#'
+#' - `nextend` (default 2): Extend curve fitting window, until `nextend` good or
+#'   marginal points are found in the previous and subsequent growing season.
+#'
+#' - `maxExtendMonth` (default 1): Search good or marginal good values in
+#'   previous and subsequent `maxExtendMonth` period.
+#'
+#' - `minExtendMonth` (default 0.5): Extend period defined by `nextend` and
+#'   `maxExtendMonth`, should be no shorter than `minExtendMonth`. When all
+#'   points of the input time-series are good value, then the extending period
+#'   will be too short. In that situation, we can't make sure the connection
+#'   between different growing seasons is smoothing.
+#'
+#' - `minPercValid`: (default 0, not use). If the percentage of good- and
+#'   marginal- quality points is less than `minPercValid`, curve fiting result is
+#'   set to `NA`.
+#'
+#' - `minT`: (not use). If `Tn` not provided in `INPUT`, `minT` will
+#'   not be used. `minT` use night temperature Tn to define backgroud value
+#'   (days with `Tn < minT` treated as ungrowing season).
+#'
+#' @param ...  other parameters to [curvefit()]
 #'
 #' @export
 curvefits <- function(
@@ -71,13 +68,9 @@ curvefits <- function(
     ...)
 {
     if (all(is.na(INPUT$y))) return(NULL)
-
-    .options$fitting %<>% modifyList(options)
-    # if (missing(methods)) methods = .options$methods_fine
-    # if (missing(wFUN)) wFUN = get(.options$wFUN_fine)
-    .options$fitting$wFUN %<>% check_function()
+    set_options(fitting = options)
     opt = .options$fitting
-
+    
     QC_flag    <- INPUT$QC_flag
     nptperyear <- INPUT$nptperyear
     t          <- INPUT$t
@@ -108,15 +101,16 @@ curvefits <- function(
     # w[I_all] <- brks$fit %>% {.[, contain(., "witer"), with = F]} %>% last()
     # w[I_fix] <- wmin + 0.1 # exert the function of whitaker smoother
 
-    # growing season dividing
+    # growing season division
     di <- data.table( beg  = getDateId_before(brks$dt$beg, t),
                       peak = getDateId_before(brks$dt$peak, t),
                       end  = getDateId_after(brks$dt$end, t)) #%>% na.omit()
 
     width_ylu = nptperyear*2
-    
+
     y    <- INPUT$y
     fits <- vector(nrow(di), mode = "list")
+
     for (i in 1:nrow(di)){
         if (opt$verbose) fprintf("  [curvefits] running %d ... \n", i)
 
@@ -137,22 +131,12 @@ curvefits <- function(
         ylu <- merge_ylu(INPUT$ylu, ylu)
         # yi[yi < ylu[1]] <- ylu[1] # update y value
 
-        # if (has_Tn){
-        #     # add background module here, 20180513
-        #     Tni        <- Tn[I_extend]
-        #     back_value <- backval(yi, ti, wi, Tni, opt$minT, nptperyear)
-        #     if (!is.na(back_value)){
-        #         I_back     <- yi < back_value
-        #         yi[I_back] <- back_value
-        #         wi[I_back] <- 0.5
-        #     }
-        # }
         beginI <- ifelse(i == 1, 1, 2) # make sure no overlap
         tout   <- doys[I] %>% {.[beginI]:last(.)} # make sure return the same length result.
 
         fFITs  <- curvefit(yi, ti, tout, nptperyear = nptperyear,
                          w = wi, ylu = ylu,
-                         iters = opt$iters, methods = opt$methods, wFUN = opt$wFUN, 
+                         iters = opt$iters, methods = opt$methods, wFUN = opt$wFUN,
                          ...)
         # add original input data here, global calculation can comment this line
         # `y` is original time-series without checked, This for plot
@@ -174,6 +158,17 @@ curvefits <- function(
     # return(list(tout = t[first(di$beg):last(di$end)],  # dates for OUTPUT curve fitting VI
     #             fits = fits))
 }
+
+# if (has_Tn){
+#     # add background module here, 20180513
+#     Tni        <- Tn[I_extend]
+#     back_value <- backval(yi, ti, wi, Tni, opt$minT, nptperyear)
+#     if (!is.na(back_value)){
+#         I_back     <- yi < back_value
+#         yi[I_back] <- back_value
+#         wi[I_back] <- 0.5
+#     }
+# }
 
 getDateId <- function(dates, t){
     match(dates, t) #%>% rm_empty()

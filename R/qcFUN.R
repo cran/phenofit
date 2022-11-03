@@ -1,4 +1,5 @@
 #' Initial weights according to qc
+#' @name qcFUN
 #' 
 #' @description
 #' * `getBits`: Extract bitcoded QA information from bin value
@@ -9,9 +10,10 @@
 #'      confidence score, suit for MCD15A3H(LAI, FparLai_QC), MOD17A2H(GPP, Psn_QC) 
 #'      and MOD16A2(ET, ET_QC).
 #' * `qc_StateQA`: Initial weights based on `StateQA`, suit for MOD09A1, MYD09A1.
-#' * `qc_FparLai`
-#' * `qc_NDVI3g`: For NDVI3g
-#' * `qc_NDVIv4`: For NDVIv4
+#' * `qc_FparLai`: For MODIS LAI
+#' 
+#' * `qc_NDVI3g`: For AVHRR NDVI3g
+#' * `qc_NDVIv4`: For AVHRR NDVIv4
 #' 
 #' @param x Binary value
 #' @param start Bit starting position, count from zero
@@ -25,6 +27,11 @@
 #' * `QC_flag`: Factor vector, with the level of 
 #' `c("snow", "cloud", "shadow", "aerosol", "marginal", "good")`
 #' 
+#' @note
+#' `qc_5l` and `qc_NDVIv4` only returns `weight`, without `QC_flag`.
+#' 
+#' @seealso [qc_sentinel2()]
+#' 
 #' @references
 #' https://developers.google.com/earth-engine/datasets/catalog/MODIS_006_MOD13A1
 #' 
@@ -37,6 +44,7 @@
 #' r_5l <- qc_5l(QA, wmin = 0.2, wmid = 0.5, wmax = 1)
 #' r_NDVI3g <- qc_NDVI3g(QA, wmin = 0.2, wmid = 0.5, wmax = 1)
 #' r_NDVIv4 <- qc_NDVIv4(QA, wmin = 0.2, wmid = 0.5, wmax = 1)
+
 #' @rdname qcFUN
 #' @export
 getBits <- function(x, start, end = start){
@@ -107,20 +115,6 @@ qc_StateQA <- function(QA, wmin = 0.2, wmid = 0.5, wmax = 1){
     list(QC_flag = QC_flag, w = w) # quickly return
 }
 
-#' @rdname qcFUN
-#' @export
-qc_5l <- function(QA, wmin = 0.2, wmid = 0.5, wmax = 1){
-    # bit5-7, five-level confidence score
-    # QA <- bitwShiftR(bitwAnd(QA, 224), 5) #1110 0000=224L
-    QA <- getBits(QA, 5, 7)
-    w  <- rep(NA, length(QA)) #default zero
-    
-    w[QA <= 1] <- wmax          #clear, good
-    w[QA >= 2 & QA <=3] <- wmid #geometry problems or others
-    w[QA >  4] <- wmin
-    return(w)
-}
-
 # MODIS_006_MCD15A3H
 #' @rdname qcFUN
 #' @param FparLai_QC Another QC flag of `MCD15A3H`
@@ -169,6 +163,33 @@ qc_FparLai <- function(QA, FparLai_QC = NULL, wmin = 0.2, wmid = 0.5, wmax = 1){
 
 #' @rdname qcFUN
 #' @export
+qc_5l <- function(QA, wmin = 0.2, wmid = 0.5, wmax = 1) {
+    # bit5-7, five-level confidence score
+    # QA <- bitwShiftR(bitwAnd(QA, 224), 5) #1110 0000=224L
+    QA <- getBits(QA, 5, 7)
+    w <- rep(NA, length(QA)) # default zero
+
+    w[QA <= 1] <- wmax # clear, good
+    w[QA >= 2 & QA <= 3] <- wmid # geometry problems or others
+    w[QA > 4] <- wmin
+    return(w)
+}
+
+#' @rdname qcFUN
+#' @export
+qc_NDVIv4 <- function(QA, wmin = 0.2, wmid = 0.5, wmax = 1) {
+    # bit1-2: cloudy, cloud shadow
+    QA <- bitwShiftR(bitwAnd(QA, 7), 1)
+
+    w <- rep(NA, length(QA))
+    w[QA == 0] <- wmax # clear, good
+    w[QA == 2] <- 0.5 # cloud shadow
+    return(w)
+}
+
+
+#' @rdname qcFUN
+#' @export
 qc_NDVI3g <- function(QA, wmin = 0.2, wmid = 0.5, wmax = 1){
     # bit1-2: cloudy, cloud shadow
     
@@ -181,18 +202,6 @@ qc_NDVI3g <- function(QA, wmin = 0.2, wmid = 0.5, wmax = 1){
     list(QC_flag = QC_flag, w = w) # quickly return
 }
 
-
-#' @rdname qcFUN
-#' @export
-qc_NDVIv4 <- function(QA, wmin = 0.2, wmid = 0.5, wmax = 1){
-    # bit1-2: cloudy, cloud shadow
-    QA <- bitwShiftR(bitwAnd(QA, 7), 1) 
-    
-    w  <- rep(NA, length(QA))
-    w[QA == 0] <- wmax   #clear, good
-    w[QA == 2] <- 0.5 #cloud shadow
-    return(w)
-}
 
 #' @rdname qcFUN
 #' @export
@@ -217,6 +226,49 @@ qc_SPOT <- function (QA, wmin = 0.2, wmid = 0.5, wmax = 1) {
     list(QC_flag = QC_flag, w = w)
 }
 
+#' Initial weights for sentinel2 according to SCL band
+#' 
+#' @param SCL quality control variable for sentinel2
+#' @inheritParams qc_summary
+#' 
+#' @description 
+#' | **SCL Value** | **Description**                       | **Quality** | **weight** |
+#' | ------------- | ------------------------------------- | ----------- | ---------- |
+#' | 1             | Saturated or defective                | Bad         | \eqn{w_{min}}  |
+#' | 2             | Dark Area Pixels                      | Bad         | \eqn{w_{min}}  |
+#' | 3             | Cloud Shadows                         | Bad         | \eqn{w_{min}}  |
+#' | 4             | Vegetation                            | Good        | \eqn{w_{max}}  |
+#' | 5             | Bare Soils                            | Good        | \eqn{w_{max}}  |
+#' | 6             | Water                                 | Good        | \eqn{w_{max}}  |
+#' | 7             | Clouds Low Probability / Unclassified | Good        | \eqn{w_{max}}  |
+#' | 8             | Clouds Medium Probability             | Marginal    | \eqn{w_{mid}}  |
+#' | 9             | Clouds High Probability               | Bad         | \eqn{w_{mid}}  |
+#' | 10            | Cirrus                                | Good        | \eqn{w_{mid}}  |
+#' | 11            | Snow / Ice                            | Bad         | \eqn{w_{mid}}  |
+#' @references 
+#' https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR
+#' 
+#' @examples
+#' qc_sentinel2(1:11)
+#' @export
+qc_sentinel2 <- function(SCL, wmin = 0.2, wmid = 0.5, wmax = 1) {
+    QA <- SCL
+    qc_good = c(4, 5, 6, 7, 10)
+    qc_bad = c(1, 2, 3, 9)
+    qc_mid = c(8)
+    w <- rep(wmin, length(QA)) # default weight is zero
+    w[QA %in% qc_good] = wmax
+    w[QA %in% qc_mid]  = wmid
+    w[QA %in% c(qc_bad, 11)] = wmin
+
+    QC_flag = rep("bad", length(QA))
+    QC_flag[QA %in% qc_good] = "good"
+    QC_flag[QA %in% qc_mid]  = "marginal"
+    QC_flag[QA %in% qc_bad]  = "cloud"
+    QC_flag[QA %in% c(11)]   = "snow" # snow is useful for phenology
+
+    listk(QC_flag, w)
+}
 
 # source('R/GPP_Pheno/main_QC.R')
 # 

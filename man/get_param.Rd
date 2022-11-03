@@ -2,17 +2,26 @@
 % Please edit documentation in R/get_param.R
 \name{get_param}
 \alias{get_param}
+\alias{get_param.list}
 \alias{get_param.fFITs}
+\alias{get_param.fFIT}
 \title{Get parameters from curve fitting result}
 \usage{
-get_param(fits)
+get_param(x)
 
-get_param.fFITs(fFITs)
+\method{get_param}{list}(x)
+
+\method{get_param}{fFITs}(x)
+
+\method{get_param}{fFIT}(x)
 }
 \arguments{
-\item{fits}{Multiple methods curve fitting results by \code{curvefits} result.}
-
-\item{fFITs}{\code{fFITs} object returned by \code{\link[=curvefit]{curvefit()}}.}
+\item{x}{\code{fFITs} object returned by \code{\link[=curvefit]{curvefit()}}, or list of \code{fFITs} objects}
+}
+\value{
+A list of \code{tibble} with the length being equal to the number of methods.
+Each line of \code{tibble} cotains the corresponding parameters of each growing
+season.
 }
 \description{
 Get parameters from curve fitting result
@@ -20,15 +29,14 @@ Get parameters from curve fitting result
 \examples{
 library(phenofit)
 # simulate vegetation time-series
-fFUN = doubleLog.Beck
+FUN = doubleLog.Beck
 par  = c( mn  = 0.1, mx  = 0.7, sos = 50, rsp = 0.1, eos = 250, rau = 0.1)
 t    <- seq(1, 365, 8)
 tout <- seq(1, 365, 1)
-y <- fFUN(par, t)
+y <- FUN(par, t)
 methods <- c("AG", "Beck", "Elmore", "Gu", "Zhang") # "Klos" too slow
-fFITs <- curvefit(y, t, tout, methods)
-# multiple years
-fits  <- list(`2001` = fFITs, `2002` = fFITs)
+fit <- curvefit(y, t, tout, methods) # `fFITs` (fine-fitting) object 
+fits <- list(`2001` = fit, `2002` = fit) # multiple years
 
 l_param   <- get_param(fits)
 d_GOF     <- get_GOF(fits)

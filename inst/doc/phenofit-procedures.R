@@ -40,7 +40,7 @@ INPUT <- check_input(d$t, d$y, d$w,
 )
 
 brks <- season_mov(INPUT,
-    list(FUN = smooth_wWHIT, wFUN = wFUN,
+    list(FUN = "smooth_wWHIT", wFUN = wFUN,
         maxExtendMonth = 3,
         wmin = wmin, r_min = 0.1
     ))
@@ -86,7 +86,7 @@ grid::grid.draw(g)
 
 # extract phenology metrics, only the first 3 year showed at here
 # write_fig({
-l_pheno <- get_pheno(fit[1:7], method = "AG", TRS = TRS, IsPlot = TRUE, show_title = FALSE)
+l_pheno <- get_pheno(fit[1:7], method = "AG", TRS = TRS, IsPlot = TRUE, show.title = FALSE)
 # }, "Figure6_phenology_metrics.pdf", 8, 6, show = TRUE)
 
 ## -----------------------------------------------------------------------------

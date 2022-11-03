@@ -11,14 +11,14 @@ INPUT <- check_input(d$t, d$y, d$w, QC_flag = d$QC_flag,
 wFUN <- "wTSM"
 brks2 <- season_mov(INPUT,
     options = list(
-        rFUN = smooth_wWHIT, wFUN = wFUN,
+        rFUN = "smooth_wWHIT", wFUN = wFUN,
         r_min = 0.05, ypeak_min = 0.05,
         lambda = 10,
         verbose = FALSE
     ))
 # plot_season(INPUT, brks2, d)
 # Fine fitting
-fit <- curvefits(
+fits <- curvefits(
     INPUT, brks2,
     options = list(
         methods = c("AG", "Beck", "Elmore", "Zhang"), #,"klos", "Gu"
@@ -27,10 +27,10 @@ fit <- curvefits(
     )
 )
 
-r_param = get_param(fit)
-r_pheno = get_pheno(fit)
-r_gof = get_GOF(fit)
-d_fit = get_fitting(fit)
+r_param = get_param(fits)
+r_pheno = get_pheno(fits)
+r_gof = get_GOF(fits)
+d_fit = get_fitting(fits)
 
 g <- plot_curvefits(d_fit, brks2)
 grid::grid.newpage(); grid::grid.draw(g)

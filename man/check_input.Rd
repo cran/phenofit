@@ -11,7 +11,6 @@ check_input(
   QC_flag,
   nptperyear,
   south = FALSE,
-  Tn = NULL,
   wmin = 0.2,
   wsnow = 0.8,
   ymin,
@@ -22,6 +21,7 @@ check_input(
   date_start = NULL,
   date_end = NULL,
   mask_spike = TRUE,
+  na.rm = FALSE,
   ...
 )
 }
@@ -41,10 +41,6 @@ used for visualization in \code{\link[=get_pheno]{get_pheno()}} and \code{\link[
 
 \item{south}{Boolean. In south hemisphere, growing year is 1 July to the
 following year 31 June; In north hemisphere, growing year is 1 Jan to 31 Dec.}
-
-\item{Tn}{Numeric vector, night temperature, default is null. If provided,
-Tn is used to help divide ungrowing period, and then get background value in
-ungrowing season (see details in \code{\link[=backval]{backval()}}).}
 
 \item{wmin}{Double, minimum weight of bad points, which could be smaller
 the weight of snow, ice and cloud.}
@@ -81,6 +77,9 @@ time-sereis (before \code{add_HeadTail})}
 
 \item{mask_spike}{Boolean. Whether to remove spike values?}
 
+\item{na.rm}{Boolean. If \code{TRUE}, NA and spike values will be removed;
+otherwise, NA and spike values will be interpolated by valid neighbours.}
+
 \item{...}{Others will be ignored.}
 }
 \value{
@@ -111,14 +110,11 @@ weights for NA in y and w.
 \examples{
 data("CA_NS6")
 d = CA_NS6
-head(d)
+# head(d)
 
-nptperyear <- 23
+nptperyear = 23
 INPUT <- check_input(d$t, d$y, d$w, QC_flag = d$QC_flag,
      nptperyear = nptperyear, south = FALSE, 
      maxgap = nptperyear/4, alpha = 0.02, wmin = 0.2)
 plot_input(INPUT)
-}
-\seealso{
-\code{\link[=backval]{backval()}}
 }

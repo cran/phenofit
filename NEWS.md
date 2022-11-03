@@ -1,3 +1,53 @@
+# phenofit 0.3.5 (2022-02-12; Kong et al., 2022, MEE)
+
+- add TIMESAT global model function and cutoff function.
+- add the parameter `na.rm` in `check_input`. If `na.rm` = true, missing and
+  spike values will be discarded; otherwise, they will be interpolated by valid
+  neihbours.
+- change `analytical` to `FALSE` in `PhenoDeriv.fFIT`, `PhenoGu.fFIT`
+
+# phenofit 0.3.4 (2021-12-12)
+
+- fix `minpeakheight` error in `PhenoKl`, which leads to `PhenoKl` failed unexpectedly.
+- plateau line fitting in `PhenoGu`
+
+# phenofit 0.3.3 (2021-11-14)
+
+- Fix typo error in curvefits' document.
+
+- Fix the error of `plot.fFITs`, due to `fFIT` renamed to `model`.
+  
+- Rename function `opt_season` to `season_input`
+  
+- In the case of none growing season division information, `find_season.peaks` will be error. Fixed now.
+  
+- Fix the bug of `init_param` in the approximately monotonous time-sereis (e.g. fast harvest
+  leads to a very short senescence period, and hence approximately monotonic in
+  the whole growing season). In previous version, the parameter boundary of `sos`
+  might exceed that of `eos`.
+
+- Improved the phenology extraction method `PhenoTrs`, `PhenoDeriv` and
+  `PhenoGu` in the approximately monotonous time-sereis. In the previous version
+  `NA` value will be return. In the current version, if the time series is
+  monotonously increasing, EOS will be the mean value of `t[n]` and peak date of
+  season (`POP`). 
+  But `PhenoKlos` has no method to avoid `NA` values, because it
+  used the strict mathematical solution to find the extreme values in the curve
+  of curvature's change rate.
+
+**MAJOR updates to improve multi-GS phenology extraction**
+
+- Fix the bug of `findpeaks`, which lead to sharp changed growing season failed to detect.
+
+- Fix the bug of `PhenoKlos`, where `minpeakheight` not work in previous version.
+
+- Fix the bug of `check_season_dt`, where `peak` might be able to greater than `end`.
+
+- Remove the parameter `check_season_dt` in `removeClosedExtreme`, which might eliminate
+  good extreme values.
+  
+- add `get_pheno.rfit` to extract vegetation phenology from rough fitting directly.
+
 # phenofit 0.3.2 (2021-10-15)
 
 - Parameters of `season_mov` and `curvefits`  are wrapped into options. Scripts of phenofit v2.0 will not work anymore.

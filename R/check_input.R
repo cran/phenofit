@@ -4,14 +4,17 @@
 
 # ' @param perc_wc critical percentage of good- and marginal- quality points for
 # ' `wc`.
+# ' @param Tn Numeric vector, night temperature, default is null. If provided,
+# ' Tn is used to help divide ungrowing period, and then get background value in
+# ' ungrowing season (see details in [phenofit::backval()]).
 
 #' check_input
 #'
 #' Check input data, interpolate NA values in y, remove spike values, and set
 #' weights for NA in y and w.
 #'
-#' @param t Numeric vector, `Date` variable
 #' @param y Numeric vector, vegetation index time-series
+#' @param t Numeric vector, `Date` variable
 #' @param w (optional) Numeric vector, weights of `y`. If not specified,
 #' weights of all `NA` values will be `wmin`, the others will be 1.0.
 #' @param QC_flag Factor (optional) returned by `qcFUN`, levels should be
@@ -21,9 +24,6 @@
 #' @param nptperyear Integer, number of images per year.
 #' @param south Boolean. In south hemisphere, growing year is 1 July to the
 #' following year 31 June; In north hemisphere, growing year is 1 Jan to 31 Dec.
-#' @param Tn Numeric vector, night temperature, default is null. If provided,
-#' Tn is used to help divide ungrowing period, and then get background value in
-#' ungrowing season (see details in [phenofit::backval()]).
 #' @param wmin Double, minimum weight of bad points, which could be smaller
 #' the weight of snow, ice and cloud.
 #' @param wsnow Doulbe. Reset the weight of snow points, after get `ylu`.
@@ -49,9 +49,13 @@
 #' specified, `alpha_high=alpha`.
 #' @param date_start,date_end starting and ending date of the original vegetation
 #' time-sereis (before `add_HeadTail`)
-#' @param ... Others will be ignored.
+#' 
 #' @param mask_spike Boolean. Whether to remove spike values?
-#'
+#' @param na.rm Boolean. If `TRUE`, NA and spike values will be removed; 
+#' otherwise, NA and spike values will be interpolated by valid neighbours.
+#' 
+#' @param ... Others will be ignored.
+#' 
 #' @return A list object returned:
 #' * `t` : Numeric vector
 #' * `y0`: Numeric vector, original vegetation time-series.
@@ -70,17 +74,17 @@
 #'      `y_good = y[w >= w_critical]`,  \cr
 #'      `ymin = pmax( quantile(y_good, alpha/2), 0)`  \cr `ymax = max(y_good)`.
 #'
-#' @seealso [phenofit::backval()]
-#' @example inst/examples/ex-check_input.R
+#' @example R/examples/ex-check_input.R
 #' @export
 check_input <- function(t, y, w, QC_flag,
-    nptperyear, south = FALSE, Tn = NULL,
+    nptperyear, south = FALSE, 
     wmin = 0.2,
     wsnow = 0.8,
     ymin, missval,
     maxgap, alpha = 0.02, alpha_high = NULL,
     date_start = NULL, date_end = NULL,
-    mask_spike = TRUE,
+    mask_spike = TRUE, 
+    na.rm = FALSE,
     ...)
 {
     if (missing(QC_flag)) QC_flag <- NULL
@@ -115,8 +119,7 @@ check_input <- function(t, y, w, QC_flag,
         ylu[1] <- pmax(ylu[1], ymin)
     }
     A = diff(ylu)
-    # When check_ylu, ylu_max is not used. ylu_max is only used for dividing
-    # growing seasons.
+    # When check_ylu, ylu_max is not used. ylu_max is only used for growing seasons division.
 
     # adjust weights according to ylu
     # if (trim){
@@ -164,17 +167,25 @@ check_input <- function(t, y, w, QC_flag,
     ## 3. gap-fill NA values
     w[is.na(w) | is.na(y)] <- wmin
     w[w <= wmin] <- wmin
-    # left missing values were interpolated by `na.approx`
-    y <- na.approx(y, maxgap = maxgap, na.rm = FALSE)
-    # If still have na values after na.approx, just replace it with `missval`.
-    y[is.na(y)] <- missval
-
-    if (!is_empty(Tn)){
-        Tn <- na.approx(Tn, maxgap = maxgap, na.rm = FALSE)
+    if (isTRUE(na.rm)) {
+        ind = which.notna(y)
+        y  = y[ind]
+        y0 = y0[ind]
+        t  = t[ind]
+        w  = w[ind]
+        QC_flag = QC_flag[ind]
+    } else {
+        # left missing values were interpolated by `na.approx`
+        y <- na.approx(y, maxgap = maxgap, na.rm = FALSE)
+        # If still have na values after na.approx, just replace it with `missval`.
+        y[is.na(y)] <- missval
     }
-    list(t = t, y0 = y0, y = y, w = w, QC_flag = QC_flag, Tn = Tn, ylu = ylu,
+    
+    # if (!is_empty(Tn)) Tn <- na.approx(Tn, maxgap = maxgap, na.rm = FALSE)
+    structure(list(
+        t = t, y0 = y0, y = y, w = w, QC_flag = QC_flag, ylu = ylu,
         nptperyear = nptperyear, south = south,
-        date_start = date_start, date_end = date_end)
+        date_start = date_start, date_end = date_end), class = 'input')
 }
 
 #' check_ylu
