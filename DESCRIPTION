@@ -1,7 +1,7 @@
 Package: phenofit
 Type: Package
 Title: Extract Remote Sensing Vegetation Phenology
-Version: 0.3.6
+Version: 0.3.7
 Authors@R: c(
     person("Dongdong", "Kong", role = c("aut", "cre"), email = "kongdd.sysu@gmail.com"),
     person("Mingzhong", "Xiao", role = c("aut"), email = "xmingzh@mail2.sysu.edu.cn"),
@@ -43,7 +43,7 @@ URL: https://github.com/eco-hydro/phenofit
 BugReports: https://github.com/eco-hydro/phenofit/issues
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2022-11-03 06:29:52 UTC; hydro
+Packaged: 2022-11-07 05:05:52 UTC; kong
 Author: Dongdong Kong [aut, cre],
   Mingzhong Xiao [aut],
   Yongqiang Zhang [aut],
@@ -51,4 +51,4 @@ Author: Dongdong Kong [aut, cre],
   Jianjian Cui [aut]
 Maintainer: Dongdong Kong <kongdd.sysu@gmail.com>
 Repository: CRAN
-Date/Publication: 2022-11-03 08:26:39 UTC
+Date/Publication: 2022-11-07 11:40:02 UTC
