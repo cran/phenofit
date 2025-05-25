@@ -50,8 +50,8 @@ titlestr   <- with(sp, sprintf('[%03d,%s] %s, lat = %5.2f, lon = %6.2f',
 file_pdf   <- sprintf('Figure/%s_[%03d]_%s.pdf', prefix_fig, sp$ID[1], sp$site[1])
 
 ## ----interp Tn, eval=F--------------------------------------------------------
-#  d$Tn %<>% zoo::na.approx(maxgap = 4)
-#  plot(d$Tn, type = "l"); abline(a = 5, b = 0, col = "red")
+# d$Tn %<>% zoo::na.approx(maxgap = 4)
+# plot(d$Tn, type = "l"); abline(a = 5, b = 0, col = "red")
 
 ## ----check_input--------------------------------------------------------------
 dnew  <- add_HeadTail(d, south, nptperyear = 23) # add additional one year in head and tail
